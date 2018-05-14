@@ -1,0 +1,49 @@
+html {
+    min-height: 100%;
+    background: linear-gradient(rgba(157, 145, 129, 0.38), rgba(215, 191, 150, 0.42));
+}
+
+body {
+    background-color: transparent;
+}
+
+.card-profile {
+    width: 340px;
+    margin: 50px auto;
+    background-color: #e6e5e1;
+    border-radius: 0;
+    border: 0;
+    box-shadow: 1em 1em 2em rgba(0, 0, 0, 0.2);
+}
+
+.card-profile .card-img-top {
+    border-radius: 0;
+}
+
+.card-profile .card-img-profile {
+    max-width: 100%;
+    border-radius: 50%;
+    margin-top: -95px;
+    margin-bottom: 35px;
+    border: 5px solid #e6e5e1;
+}
+
+.card-profile .card-title {
+    margin-bottom: 50px;
+}
+
+.card-profile .card-title small {
+    display: block;
+    font-size: .6em;
+    margin-top: .2em;
+}
+
+.card-profile .card-links {
+    margin-bottom: 25px;
+}
+
+.star-rating {
+    line-height:32px;
+    font-size:1.25em;
+    cursor: pointer;
+}

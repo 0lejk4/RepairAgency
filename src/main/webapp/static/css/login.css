@@ -1,0 +1,9 @@
+#particles-js {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    position: fixed;
+    background: #232741 50% 50%;
+    top: 0px;
+    z-index: 1;
+}

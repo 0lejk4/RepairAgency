@@ -1,0 +1,12 @@
+<Context allowCasualMultipartParsing="true">
+    <Resource name="jdbc/repair_agency_db"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="org.postgresql.Driver"
+              url="jdbc:postgresql://localhost:5432/RepairAgencyDB"
+              username="db_api"
+              password="MTIzNHF3ZXI="
+              maxTotal="20"
+              maxIdle="10"
+              maxWaitMillis="-1"/>
+</Context>
