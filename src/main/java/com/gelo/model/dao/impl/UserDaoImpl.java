@@ -1,10 +1,12 @@
 package com.gelo.model.dao.impl;
 
-import com.gelo.model.dao.generic.impl.AbstractJDBCDao;
 import com.gelo.model.dao.UserDao;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.model.domain.*;
+import com.gelo.model.dao.generic.impl.AbstractJDBCDao;
+import com.gelo.model.domain.Role;
+import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
+import com.gelo.model.exception.DatabaseException;
+import com.gelo.util.constants.Queries;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -28,17 +30,22 @@ public class UserDaoImpl extends AbstractJDBCDao<User, Long> implements UserDao 
 
     @Override
     public String getSelectQuery() {
-        return "SELECT users.id, email, name, password, country, active_orders_count ,summary_orders_count, role_id, type FROM users INNER JOIN roles ON users.role_id = roles.id ";
+        return Queries.USER_SELECT;
+    }
+
+    @Override
+    public String getCountQuery() {
+        throw new NotImplementedException();
     }
 
     @Override
     public String getCreateQuery() {
-        return "INSERT INTO users(name,email,country, password,role_id) VALUES (?,?,?,?,?);";
+        return Queries.USER_CREATE;
     }
 
     @Override
     public String getUpdateQuery() {
-        return "UPDATE users set summary_orders_count = ?, active_orders_count = ? where id = ?;";
+        return Queries.USER_UPDATE;
     }
 
     @Override
@@ -90,6 +97,7 @@ public class UserDaoImpl extends AbstractJDBCDao<User, Long> implements UserDao 
 
     /**
      * Parses user from result set
+     *
      * @param rs result set to be parsed
      * @return parsed user
      * @throws SQLException happens if fields does not exist when trying to obtain it from result set
@@ -115,7 +123,7 @@ public class UserDaoImpl extends AbstractJDBCDao<User, Long> implements UserDao 
         ResultSet rs;
         User user = null;
         try (PreparedStatement ps = getConnection()
-                .prepareStatement("SELECT users.id, email, name, password, country, active_orders_count ,summary_orders_count,role_id, type FROM users INNER JOIN roles ON users.role_id = roles.id WHERE email=? LIMIT 1;")) {
+                .prepareStatement(Queries.USER_FIND_BY_EMAIL)) {
             ps.setString(1, email);
             rs = ps.executeQuery();
             if (rs.next()) {
@@ -144,7 +152,7 @@ public class UserDaoImpl extends AbstractJDBCDao<User, Long> implements UserDao 
     public boolean emailTaken(String email) throws DatabaseException {
         ResultSet rs = null;
         try (PreparedStatement ps = getConnection()
-                .prepareStatement("SELECT email FROM users WHERE email=? LIMIT 1;")) {
+                .prepareStatement(Queries.USER_CHECK_EMAIL)) {
             ps.setString(1, email);
             rs = ps.executeQuery();
             if (rs.next()) {

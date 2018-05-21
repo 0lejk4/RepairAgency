@@ -5,29 +5,37 @@
 <%@ taglib prefix="auth" uri="/authtags" %>
 <%@ taglib prefix="info" tagdir="/WEB-INF/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="com.gelo.model.domain.PermissionType" %>
+<jsp:useBean id="orders" scope="request" type="java.util.List<com.gelo.model.domain.Order>"/>
 <html>
 <head>
-    <title>Your history</title>
+    <title>User history - RepairAgency</title>
     <c:import url="WEB-INF/jspf/includes.jsp"/>
 </head>
 <body>
 <c:import url="WEB-INF/jspf/header.jsp"/>
 <div class="container-fluid table-responsive">
-    <h2 class="display-5 mx-auto"><fmt:message key="field.your.orders"/></h2>
+    <h4 class="display-4 row"><span class="mx-auto"><fmt:message key="field.your.orders"/></span></h4>
+    <info:pagination all_count="${requestScope['all_count']}" order_field="${requestScope['order_field']}"
+                     ascending="${requestScope['ascending']}" page_count="${requestScope['page_count']}"
+                     page="${requestScope['page']}" count="${requestScope['count']}"
+                     order_fields="${['id','price', 'author_id', 'master_id', 'done', 'manager_id', 'accepted']}"
+                     entities="${orders}"
+                     link="${'/app/order/history'}"/>
+
 
     <table class="table table-bordered table-hover table-sm">
+        <thead class="thead-dark">
         <tr>
-            <td><fmt:message key="field.id"/></td>
-            <td><fmt:message key="field.description"/></td>
-            <td><fmt:message key="field.manager"/></td>
-            <td><fmt:message key="field.manager.description"/></td>
-            <td><fmt:message key="field.price"/></td>
-            <td><fmt:message key="field.master"/></td>
-            <td><fmt:message key="field.status"/></td>
+           <th scope="col"><fmt:message key="field.id"/></th>
+           <th scope="col"><fmt:message key="field.description"/></th>
+           <th scope="col"><fmt:message key="field.manager"/></th>
+           <th scope="col"><fmt:message key="field.manager.description"/></th>
+           <th scope="col"><fmt:message key="field.price"/></th>
+           <th scope="col"><fmt:message key="field.master"/></th>
+           <th scope="col"><fmt:message key="field.status"/></th>
         </tr>
+        </thead>
 
-        <jsp:useBean id="orders" scope="request" type="java.util.List<com.gelo.model.domain.Order>"/>
         <c:forEach items="${orders}" var="order">
             <tr>
                 <td>${order.id}</td>
@@ -35,17 +43,17 @@
                 <td><a href="<c:url value="/app/profile?profile_id=${order.manager.id}"/>">${order.manager.name}</a>
                 </td>
                 <td>${order.managerDescription}</td>
-                <td>${order.price}</td>
+                <td>${order.price}${order.price == null?'':'₴'}</td>
                 <c:choose>
                     <c:when test="${order.master == null}">
                         <td><fmt:message key="field.searching.master"/></td>
-                        <td><fmt:message key="field.in.progress"/></td>
+                        <td><span class="badge badge-info"><fmt:message key="field.in.progress"/></span></td>
                     </c:when>
                     <c:otherwise>
                         <td>
                             <a href="<c:url value="/app/profile?profile_id=${order.master.id}"/>">${order.master.name}</a>
                         </td>
-                        <td><fmt:message key="field.done"/></td>
+                        <td><span class="badge badge-success"><fmt:message key="field.done"/></span></td>
                     </c:otherwise>
                 </c:choose>
 

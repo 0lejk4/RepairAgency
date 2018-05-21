@@ -1,14 +1,15 @@
 package com.gelo.validation.forms;
 
 import com.gelo.model.domain.Order;
+import com.gelo.validation.Form;
 import com.gelo.validation.Valid;
-import com.gelo.validation.Validated;
 import com.gelo.validation.constants.Regexps;
 
 /**
  * The type Order form.
+ * Is used when user creates order.
  */
-public class OrderForm extends Validated {
+public class OrderForm extends Form {
     private String description;
 
     /**

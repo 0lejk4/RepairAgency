@@ -7,7 +7,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Profile</title>
+    <title>Profile id_${profile_user.id} - RepairAgency</title>
     <c:import url="WEB-INF/jspf/includes.jsp"/>
     <link rel="stylesheet"
           href="<c:url value="/static/css/profile.css"/>"/>
@@ -28,6 +28,8 @@
                 <br>
                 <c:out value="${profile_user.country}"/>
                 <br>
+                <span class="badge badge-pill badge-success">${profile_user.summaryOrdersCount} <fmt:message
+                        key="orders.done"/></span>
                 <span class="badge badge-light"> <small> <c:out value="${profile_user.email}"/> </small></span>
             </h4>
         </div>
@@ -81,66 +83,13 @@
             </div>
         </c:forEach>
 
-        <c:if test="${reviews.size() != 0}">
-            <%--Todo: Make this an tag or fragment and reuse--%>
-            <form action="<c:url value="/app/profile"/>" method="get">
-                <input type="hidden" name="profile_id" value="${profile_user.id}">
-                <input id="page" type="hidden" name="page">
-                <select name="count"
-                        onchange="document.getElementById('page').value = '${requestScope['page']}';submit()">
-                    <c:forEach begin="1" end="${requestScope['all_count']}" var="pageNumber" varStatus="status">
-                        <option value="${pageNumber}" ${requestScope['count'] == pageNumber ||( status.last && requestScope['count'] > requestScope['all_count'])? 'selected':''}>
-                                ${pageNumber}
-                        </option>
-                    </c:forEach>
-                </select>
-                <select name="order_field"
-                        onchange="document.getElementById('page').value = '${requestScope['page']}';submit()">
-                    <option value="id" ${requestScope['order_field'] == 'id'? 'selected':''}>
-                        Id
-                    </option>
-                    <option value="title" ${requestScope['order_field'] == 'title'? 'selected':''}>
-                        Title
-                    </option>
-                    <option value="master_id" ${requestScope['order_field'] == 'master_id'? 'selected':''}>
-                        MasterId
-                    </option>
-                    <option value="text" ${requestScope['order_field'] == 'text'? 'selected':''}>
-                        Text
-                    </option>
-                    <option value="rating" ${requestScope['order_field'] == 'rating'? 'selected':''}>
-                        Rating
-                    </option>
-                </select>
-                <select name="ascending"
-                        onchange="document.getElementById('page').value = '${requestScope['page']}';submit()">
-                    <option value="true" ${requestScope['ascending']== true? 'selected':''}>
-                        true
-                    </option>
-                    <option value="false" ${requestScope['ascending']== false? 'selected':''}>
-                        false
-                    </option>
-                </select>
-                <c:if test="${param['page'] > 1}">
-                    <button type="submit"
-                            onclick="document.getElementById('page').value = '${requestScope['page'] - 1}'"
-                            class="btn btn-info">Prev
-                    </button>
-                </c:if>
-                <c:forEach begin="1" end="${requestScope['page_count']}" var="pageNumber">
-                    <button type="submit" ${requestScope['page'] == pageNumber?'class="button-success"':''}
-                            onclick="document.getElementById('page').value = '${pageNumber}'">
-                            ${pageNumber}
-                    </button>
-                </c:forEach>
-                <c:if test="${requestScope['page'] < requestScope['page_count']}">
-                    <button type="submit"
-                            onclick="document.getElementById('page').value = '${requestScope['page'] + 1}'"
-                            class="btn btn-info">Next
-                    </button>
-                </c:if>
-            </form>
-        </c:if>
+        <info:pagination all_count="${requestScope['all_count']}" order_field="${requestScope['order_field']}"
+                         ascending="${requestScope['ascending']}" page_count="${requestScope['page_count']}"
+                         page="${requestScope['page']}" count="${requestScope['count']}"
+                         order_fields="${['id','title', 'author_id', 'text', 'rating']}" entities="${reviews}"
+                         link="${'/app/profile'}"
+                         hidden_fields="${'<input type=\\\'hidden\\\' name=\\\'profile_id\\\' value=\\\''.concat(profile_user.id).concat('\\\'>')}"/>
+
     </div>
 </div>
 <script>

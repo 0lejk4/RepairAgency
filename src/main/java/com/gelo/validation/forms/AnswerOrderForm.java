@@ -1,16 +1,17 @@
 package com.gelo.validation.forms;
 
 import com.gelo.model.domain.Order;
+import com.gelo.validation.Form;
 import com.gelo.validation.Valid;
-import com.gelo.validation.Validated;
 import com.gelo.validation.constants.Regexps;
 
 import java.math.BigDecimal;
 
 /**
  * The type Answer order form.
+ * Is used when validating manager answer.
  */
-public class AnswerOrderForm extends Validated {
+public class AnswerOrderForm extends Form {
     private String id;
     private String description;
     private String price;

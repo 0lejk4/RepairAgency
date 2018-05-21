@@ -3,7 +3,7 @@
 <fmt:setBundle basename="repair_agency_localization"/>
 <html>
 <head>
-    <title>Page Not Found</title>
+    <title>Page Not Found - RepairAgency</title>
     <c:import url="WEB-INF/fragment/includes.jsp"/>
     <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <link rel="stylesheet"

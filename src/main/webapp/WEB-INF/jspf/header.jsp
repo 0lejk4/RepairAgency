@@ -3,7 +3,6 @@
 <jsp:useBean id="user" scope="session" type="com.gelo.model.domain.User"/>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="auth" uri="/authtags" %>
-<%@ page import="com.gelo.model.domain.RoleType" %>
 <%@ taglib prefix="info" tagdir="/WEB-INF/tags" %>
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
@@ -30,6 +29,11 @@
                                                    class="nav-link"><fmt:message key="header.manage"/></a>
                     </li>
                 </auth:hasRole>
+                <auth:hasRole user="${user}" roleType="${RoleType.ROLE_MANAGER}">
+                    <li class="active nav-item"><a href="<c:url value="/app/order/manage/history"/>"
+                                                   class="nav-link"><fmt:message key="header.manage.history"/></a>
+                    </li>
+                </auth:hasRole>
                 <auth:hasRole user="${user}" roleType="${RoleType.ROLE_USER}">
                     <li class="active nav-item"><a href="<c:url value="/app/order/history"/>"
                                                    class="nav-link"><fmt:message key="header.history"/></a>
@@ -38,6 +42,11 @@
                 <auth:hasRole user="${user}" roleType="${RoleType.ROLE_MASTER}">
                     <li class="active nav-item"><a href="<c:url value="/app/order/master"/>"
                                                    class="nav-link"><fmt:message key="header.master"/></a>
+                    </li>
+                </auth:hasRole>
+                <auth:hasRole user="${user}" roleType="${RoleType.ROLE_MASTER}">
+                    <li class="active nav-item"><a href="<c:url value="/app/order/master/history"/>"
+                                                   class="nav-link"><fmt:message key="header.master.history"/></a>
                     </li>
                 </auth:hasRole>
                 <auth:hasRole user="${user}" roleType="${RoleType.ROLE_ADMIN}">
@@ -49,7 +58,7 @@
             </ul>
             <ul class="nav navbar-nav ml-auto">
                 <li class="active nav-item">
-                    <form action="<c:url value="/app/language"/>">
+                    <form action="<c:url value="/app/language"/>" method="post">
                         <select id="language" class="form-control" data-width="fit" name="language" onchange="submit()">
                             <option value="en" ${language == 'en' ? 'selected' : ''}>
                                 <fmt:message key="header.language.english"/>

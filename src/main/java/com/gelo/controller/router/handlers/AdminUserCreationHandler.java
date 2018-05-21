@@ -1,6 +1,7 @@
 package com.gelo.controller.router.handlers;
 
-import com.gelo.controller.router.security.PreAuthorize;
+import com.gelo.controller.router.annotation.PostMapping;
+import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.RoleType;
 import com.gelo.services.UserService;
@@ -24,6 +25,7 @@ import static com.gelo.validation.Alert.single;
  * It checks if the user with input email exists and shows warning message to admin.
  * Also handler encodes password using PasswordUtils method.
  */
+@PostMapping
 @PreAuthorize(role = RoleType.ROLE_ADMIN)
 public class AdminUserCreationHandler implements Handler {
     private Logger logger = Logger.getLogger(AdminUserCreationHandler.class);
@@ -50,13 +52,13 @@ public class AdminUserCreationHandler implements Handler {
                     logger.info("User registered with email=" + form.getEmail());
                     request.setAttribute("alerts", single(Alert.success("admin.register.success")));
                 } else {
-                    return Transport.absForward(Paths.SERVER_ERROR);
+                    return Transport.absolute(Paths.SERVER_ERROR);
                 }
             }
         } else {
             request.setAttribute("alerts",
                     form.getErrorList());
         }
-        return Transport.absForward(Paths.ADMIN_PAGE);
+        return Transport.absolute(Paths.ADMIN_PAGE);
     }
 }

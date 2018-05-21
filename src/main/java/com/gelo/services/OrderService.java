@@ -18,40 +18,99 @@ public interface OrderService {
     /**
      * Find all awaiting answer list.
      *
+     * @param orderField the order field
+     * @param ascending  the ascending
+     * @param limit      the limit
+     * @param offset     the offset
      * @return the list
      */
-    List<Order> findAllAwaitingAnswer();
+    List<Order> findAllAwaitingAnswer(String orderField, boolean ascending, int limit, int offset);
+
+    /**
+     * Count awaiting answer long.
+     *
+     * @return the long
+     */
+    Long countAwaitingAnswer();
 
     /**
      * Find all awaiting master list.
      *
+     * @param orderField the order field
+     * @param ascending  the ascending
+     * @param limit      the limit
+     * @param offset     the offset
      * @return the list
      */
-    List<Order> findAllAwaitingMaster();
+    List<Order> findAllAwaitingMaster(String orderField, boolean ascending, int limit, int offset);
+
+    /**
+     * Count awaiting master long.
+     *
+     * @return the long
+     */
+    Long countAwaitingMaster();
 
     /**
      * Find all by author id list.
      *
-     * @param authorId the author id
+     * @param authorId   the author id
+     * @param orderField the order field
+     * @param ascending  the ascending
+     * @param limit      the limit
+     * @param offset     the offset
      * @return the list
      */
-    List<Order> findAllByAuthorId(Long authorId);
+    List<Order> findAllByAuthorId(Long authorId, String orderField, boolean ascending, int limit, int offset);
+
+    /**
+     * Count by author long.
+     *
+     * @param authorId the author id
+     * @return the long
+     */
+    Long countByAuthor(Long authorId);
 
     /**
      * Find all by master id list.
      *
-     * @param masterId the master id
+     * @param masterId   the master id
+     * @param orderField the order field
+     * @param ascending  the ascending
+     * @param limit      the limit
+     * @param offset     the offset
      * @return the list
      */
-    List<Order> findAllByMasterId(Long masterId);
+    List<Order> findAllByMasterId(Long masterId, String orderField, boolean ascending, int limit, int offset);
+
+    /**
+     * Count by master long.
+     *
+     * @param masterId the master id
+     * @return the long
+     */
+    Long countByMaster(Long masterId);
 
     /**
      * Find all by manager id list.
      *
-     * @param managerId the manager id
+     * @param managerId  the manager id
+     * @param orderField the order field
+     * @param ascending  the ascending
+     * @param limit      the limit
+     * @param offset     the offset
      * @return the list
      */
-    List<Order> findAllByManagerId(Long managerId);
+    List<Order> findAllByManagerId(Long managerId, String orderField, boolean ascending, int limit, int offset);
+
+
+    /**
+     * Count by manager long.
+     *
+     * @param managerId the manager id
+     * @return the long
+     */
+    Long countByManager(Long managerId);
 
     /**
      * Answer order boolean.

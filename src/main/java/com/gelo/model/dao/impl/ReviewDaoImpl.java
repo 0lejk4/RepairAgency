@@ -1,10 +1,11 @@
 package com.gelo.model.dao.impl;
 
-import com.gelo.model.dao.generic.impl.AbstractJDBCDao;
 import com.gelo.model.dao.ReviewDao;
-import com.gelo.model.exception.DatabaseException;
+import com.gelo.model.dao.generic.impl.AbstractJDBCDao;
 import com.gelo.model.domain.Review;
 import com.gelo.model.domain.User;
+import com.gelo.model.exception.DatabaseException;
+import com.gelo.util.constants.Queries;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -25,17 +26,22 @@ public class ReviewDaoImpl extends AbstractJDBCDao<Review, Long> implements Revi
 
     @Override
     public String getSelectQuery() {
-        return "SELECT * from reviews";
+        return Queries.REVIEW_SELECT;
+    }
+
+    @Override
+    public String getCountQuery() {
+        return Queries.REVIEW_COUNT;
     }
 
     @Override
     public String getCreateQuery() {
-        return "INSERT INTO reviews ( master_id, author_id, title, text, rating ) VALUES ( ?, ? ,? ,? , CAST(? AS star) );";
+        return Queries.REVIEW_CREATE;
     }
 
     @Override
     public String getUpdateQuery() {
-        return "UPDATE reviews SET rating = ?, text = ?, title = ? where id = ? ";
+        return Queries.REVIEW_UPDATE;
     }
 
     @Override
@@ -109,28 +115,8 @@ public class ReviewDaoImpl extends AbstractJDBCDao<Review, Long> implements Revi
 
 
     @Override
-    public int countAllByMasterId(Long masterId) throws DatabaseException {
-        ResultSet rs = null;
-        int count = 0;
-        try (PreparedStatement ps = getConnection()
-                .prepareStatement("SELECT count(*) FROM reviews where master_id = ?")) {
-
-            ps.setLong(1, masterId);
-
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            logger.error("Error getting review with id = " + masterId);
-            throw new DatabaseException(
-                    "%%% Exception occured in ReviewDao findAllByMasterIdPaginated() %%% " + e);
-        } finally {
-            DbUtils.closeQuietly(rs);
-        }
-
-
-        return count;
+    public Long countAllByMasterId(Long masterId) throws DatabaseException {
+        return count(String.format("master_id = %d", masterId));
     }
 
     @Override
@@ -138,7 +124,7 @@ public class ReviewDaoImpl extends AbstractJDBCDao<Review, Long> implements Revi
         ResultSet rs = null;
         boolean can_leave_review = false;
         try (PreparedStatement ps = getConnection()
-                .prepareStatement("SELECT reviews_count < orders_count as can_leave_review from (select count(*) from reviews where reviews.master_id = ? and reviews.author_id = ?) reviews_count, (select count(*) from orders where orders.master_id = ? and orders.author_id = ?) orders_count;")) {
+                .prepareStatement(Queries.CAN_REVIEW)) {
 
             ps.setLong(1, masterId);
             ps.setLong(2, authorId);

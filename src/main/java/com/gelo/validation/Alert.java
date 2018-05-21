@@ -7,10 +7,15 @@ import java.util.Objects;
 
 /**
  * The type Alert.
+ * Is used as wrapper for errors in order to be shown to user.
  */
 public class Alert {
     /**
      * The enum Alert type.
+     * Corresponds to all existing bootstrap alert types.
+     * Simply call to string on this in jsp like this :
+     * 'class="alert alert-${someAlert.toString}"'
+     * and you`ll get alert with needed style.
      */
     public enum AlertType {
         /**
@@ -22,7 +27,27 @@ public class Alert {
         SUCCESS, /**
          * Info alert type.
          */
-        INFO;
+        INFO,
+        /**
+         * Primary alert type.
+         */
+        PRIMARY,
+        /**
+         * Secondary alert type.
+         */
+        SECONDARY,
+        /**
+         * Warning alert type.
+         */
+        WARNING,
+        /**
+         * Light alert type.
+         */
+        LIGHT,
+        /**
+         * Dark alert type.
+         */
+        DARK;
 
         @Override
         public String toString() {
@@ -35,7 +60,7 @@ public class Alert {
 
     /**
      * Danger alert.
-     *
+     * Simpler Constructor call for Danger alerts.
      * @param message the message
      * @return the alert
      */
@@ -45,7 +70,7 @@ public class Alert {
 
     /**
      * Success alert.
-     *
+     * Simpler Constructor call for Success alerts.
      * @param message the message
      * @return the alert
      */
@@ -55,7 +80,7 @@ public class Alert {
 
     /**
      * Info alert.
-     *
+     * Simpler Constructor call for Info alerts.
      * @param message the message
      * @return the alert
      */
@@ -73,7 +98,13 @@ public class Alert {
         return Collections.singletonList(alert);
     }
 
-    private Alert(AlertType type, String message) {
+    /**
+     * Instantiates a new Alert.
+     *
+     * @param type    the type
+     * @param message the message
+     */
+    public Alert(AlertType type, String message) {
         this.type = type;
         this.message = message;
     }
@@ -117,7 +148,6 @@ public class Alert {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(type, message);
     }
 }

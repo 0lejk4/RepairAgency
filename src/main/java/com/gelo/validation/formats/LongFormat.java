@@ -1,13 +1,15 @@
 package com.gelo.validation.formats;
 
+import com.gelo.validation.Form;
 import com.gelo.validation.Valid;
-import com.gelo.validation.Validated;
 import com.gelo.validation.constants.Regexps;
 
 /**
  * The type Long format.
+ * Simple check if it is Long number or not.
+ * Is able to parse long number;
  */
-public class LongFormat extends Validated {
+public class LongFormat extends Form {
     private String number;
 
     /**

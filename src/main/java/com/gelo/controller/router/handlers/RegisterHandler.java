@@ -1,15 +1,13 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.PostMapping;
 import com.gelo.factory.ServiceFactory;
-import com.gelo.model.domain.Role;
-import com.gelo.model.domain.RoleType;
-import com.gelo.model.domain.User;
-import com.gelo.util.constants.Paths;
-import com.gelo.validation.Alert;
-import com.gelo.validation.forms.RegisterForm;
 import com.gelo.services.UserService;
 import com.gelo.util.PasswordUtils;
 import com.gelo.util.Transport;
+import com.gelo.util.constants.Paths;
+import com.gelo.validation.Alert;
+import com.gelo.validation.forms.RegisterForm;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
@@ -25,6 +23,7 @@ import static com.gelo.validation.Alert.single;
  * If form is valid and the user with given email is
  * not registered password is encrypted and user is saved.
  */
+@PostMapping
 public class RegisterHandler implements Handler {
     private static Logger logger = Logger.getLogger(RegisterHandler.class);
 
@@ -37,13 +36,11 @@ public class RegisterHandler implements Handler {
                 request.getParameter("password"));
 
         if (form.valid()) {
-
-
             UserService userService = ServiceFactory.getUserServiceInstance();
             boolean status;
 
             if (userService.emailTaken(form.getEmail())) {
-                page = Transport.absForward(Paths.REGISTER_PAGE);
+                page = Transport.absolute(Paths.REGISTER_PAGE);
                 request.setAttribute("alerts",
                         single(Alert.danger("email.taken")));
             } else {
@@ -51,15 +48,15 @@ public class RegisterHandler implements Handler {
                 status = userService.save(form.parseUser());
                 if (status) {
                     logger.info("User registered with email=" + form.getEmail());
-                    page = Transport.absForward(Paths.LOGIN_PAGE);
+                    page = Transport.absolute(Paths.LOGIN_PAGE);
                     request.setAttribute("alerts",
                             single(Alert.success("register.success")));
                 } else {
-                    page = Transport.absForward(Paths.NOT_FOUND);
+                    page = Transport.absolute(Paths.NOT_FOUND);
                 }
             }
         } else {
-            page = Transport.absForward(Paths.REGISTER_PAGE);
+            page = Transport.absolute(Paths.REGISTER_PAGE);
             request.setAttribute("alerts",
                     form.getErrorList());
         }

@@ -1,11 +1,13 @@
 package com.gelo.controller.router.handlers;
 
-import com.gelo.controller.router.security.PreAuthorize;
+import com.gelo.controller.router.annotation.PostMapping;
+import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.services.OrderService;
+import com.gelo.services.UserService;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.Alert;
@@ -23,6 +25,7 @@ import static com.gelo.validation.Alert.single;
  * Action is prevented if user has more than 5 active orders.
  * If everything is ok master starts working on the order.
  */
+@PostMapping
 @PreAuthorize(role = RoleType.ROLE_MASTER)
 public class MasterEnrollHandler implements Handler {
 
@@ -31,29 +34,31 @@ public class MasterEnrollHandler implements Handler {
 
 
         User loggedUser = (User) request.getSession(true).getAttribute("user");
-        if(loggedUser.getActiveOrdersCount() > 5){
+        if (loggedUser.getActiveOrdersCount() > 5) {
             request.setAttribute("alerts", single(Alert.danger("master.too.much.orders")));
-            return Transport.absForward(Paths.HOME_PAGE);
+            return Transport.absolute(Paths.HOME_PAGE);
         }
         OrderService orderService = ServiceFactory.getOrderServiceInstance();
         LongFormat format = new LongFormat(request.getParameter("order_id"));
 
         if (!format.valid()) {
             request.setAttribute("alerts", single(Alert.danger("number.format.incorrect")));
-            return Transport.absForward(Paths.MASTER_PAGE);
+            return Transport.absolute(Paths.MASTER_PAGE);
         }
 
         Order order = new Order();
         order.setId(format.parseLong());
         order.setMaster(loggedUser);
         boolean success = orderService.linkMaster(order);
-        if(success){
+        if (success) {
             request.setAttribute("alerts", single(Alert.success("master.cheer.up")));
-        }else {
+        } else {
             request.setAttribute("alerts", single(Alert.success("went.wrong")));
         }
 
+        UserService userService = ServiceFactory.getUserServiceInstance();
+        request.getSession().setAttribute("user", userService.findByEmail(loggedUser.getEmail()));
 
-        return Transport.absForward(Paths.MASTER_PAGE);
+        return Transport.absolute(Paths.MASTER_PAGE);
     }
 }

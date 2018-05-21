@@ -31,7 +31,7 @@ public class MainServlet extends HttpServlet {
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Transport transport = router.handle(req.getRequestURI(), req, resp);
+        Transport transport = router.handle(req, resp);
 
         switch (transport.getType()) {
             case REDIRECT:

@@ -1,11 +1,13 @@
 package com.gelo.controller.router.handlers;
 
-import com.gelo.controller.router.security.PreAuthorize;
+import com.gelo.controller.router.annotation.PostMapping;
+import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.services.OrderService;
+import com.gelo.services.UserService;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.Alert;
@@ -25,6 +27,7 @@ import static com.gelo.validation.Alert.single;
  * If everything is ok order is answered by master,
  * if not - all errors are saved in request.
  */
+@PostMapping
 @PreAuthorize(role = RoleType.ROLE_MANAGER)
 public class ManagerAnswerHandler implements Handler {
     @Override
@@ -32,7 +35,7 @@ public class ManagerAnswerHandler implements Handler {
         User loggedUser = (User) request.getSession(true).getAttribute("user");
         if (loggedUser.getActiveOrdersCount() > 5) {
             request.setAttribute("alerts", single(Alert.danger("manager.too.much.orders")));
-            return Transport.absForward(Paths.HOME_PAGE);
+            return Transport.absolute(Paths.HOME_PAGE);
         }
         OrderService orderService = ServiceFactory.getOrderServiceInstance();
 
@@ -46,27 +49,30 @@ public class ManagerAnswerHandler implements Handler {
 
         if (!form.valid()) {
             request.setAttribute("alerts", form.getErrorList());
-            return Transport.absForward(Paths.MANAGER_PAGE);
+            return Transport.absolute(Paths.MANAGER_PAGE);
         }
 
         Order order = form.parseOrder();
         if (request.getParameter("accepted") != null) {
             order.setAccepted(true);
-        } else if (request.getParameter("accepted") != null) {
+        } else if (request.getParameter("declined") != null) {
             order.setAccepted(false);
         } else {
-            request.setAttribute("alerts", "Nor accepted, nor declined");
-            return Transport.absForward(Paths.MANAGER_PAGE);
+            request.setAttribute("alerts", single(Alert.success("Nor accepted, nor declined")));
+            return Transport.absolute(Paths.MANAGER_PAGE);
         }
         order.setManager(loggedUser);
         boolean success = orderService.answerOrder(order);
-        if(success){
+        if (success) {
             request.setAttribute("alerts", single(Alert.success("manager.cheer.up")));
-        }else {
+        } else {
             request.setAttribute("alerts", single(Alert.success("went.wrong")));
         }
 
 
-        return Transport.absForward(Paths.MANAGER_PAGE);
+        UserService userService = ServiceFactory.getUserServiceInstance();
+        request.getSession().setAttribute("user", userService.findByEmail(loggedUser.getEmail()));
+
+        return Transport.absolute(Paths.MANAGER_PAGE);
     }
 }

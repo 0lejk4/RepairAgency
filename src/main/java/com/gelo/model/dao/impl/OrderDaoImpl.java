@@ -1,10 +1,11 @@
 package com.gelo.model.dao.impl;
 
-import com.gelo.model.dao.generic.impl.AbstractJDBCDao;
 import com.gelo.model.dao.OrderDao;
-import com.gelo.model.exception.DatabaseException;
+import com.gelo.model.dao.generic.impl.AbstractJDBCDao;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.User;
+import com.gelo.model.exception.DatabaseException;
+import com.gelo.util.constants.Queries;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.sql.PreparedStatement;
@@ -27,17 +28,22 @@ public class OrderDaoImpl extends AbstractJDBCDao<Order, Long> implements OrderD
 
     @Override
     public String getSelectQuery() {
-        return "SELECT * FROM orders";
+        return Queries.ORDER_SELECT;
+    }
+
+    @Override
+    public String getCountQuery() {
+        return Queries.ORDER_COUNT;
     }
 
     @Override
     public String getCreateQuery() {
-        return "INSERT into orders(author_id, author_description) VALUES (?,?);";
+        return Queries.ORDER_CREATE;
     }
 
     @Override
     public String getUpdateQuery() {
-        return "UPDATE public.orders SET author_id = ?, author_description = ?, price = ?, master_id = ?, done = ?, manager_id = ?, manager_description = ?, accepted = ? WHERE id = ?;";
+        return Queries.ORDER_UPDATE;
     }
 
     @Override
@@ -60,7 +66,6 @@ public class OrderDaoImpl extends AbstractJDBCDao<Order, Long> implements OrderD
         }
         return result;
     }
-
 
 
     @Override
@@ -109,6 +114,7 @@ public class OrderDaoImpl extends AbstractJDBCDao<Order, Long> implements OrderD
 
     /**
      * Parses order from result set
+     *
      * @param rs result set to be parsed
      * @return parsed order
      * @throws SQLException happens if fields does not exist when trying to obtain it from result set
@@ -127,28 +133,53 @@ public class OrderDaoImpl extends AbstractJDBCDao<Order, Long> implements OrderD
 
 
     @Override
-    public List<Order> findAllByAuthor(Long authorId) throws DatabaseException {
-        return findAll("author_id = " + authorId, null, null, null, null);
+    public List<Order> findAllByAuthor(Long authorId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
+        return findAll("author_id = " + authorId, orderField, ascending, limit, offset);
     }
 
     @Override
-    public List<Order> findAllByMaster(Long masterId) throws DatabaseException {
-        return findAll("master_id = " + masterId, " done ", null, null, null);
+    public Long countByAuthor(Long authorId) throws DatabaseException {
+        return count(String.format("author_id = %d", authorId));
     }
 
     @Override
-    public List<Order> findAllByManager(Long managerId) throws DatabaseException {
-        return findAll("manager_id = " + managerId, null, null, null, null);
+    public List<Order> findAllByMaster(Long masterId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
+        return findAll("master_id = " + masterId, orderField, ascending, limit, offset);
     }
 
     @Override
-    public List<Order> findAllAwaitingAnswer() throws DatabaseException {
-        return findAll("manager_id IS NULL", null, null, null, null);
+    public Long countByMaster(Long masterId) throws DatabaseException {
+        return count(String.format("master_id = %d", masterId));
     }
 
     @Override
-    public List<Order> findAllAwaitingMaster() throws DatabaseException {
-        return findAll("master_id IS NULL AND manager_id IS NOT NULL", null, null, null, null);
+    public List<Order> findAllByManager(Long managerId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
+        return findAll("manager_id = " + managerId, orderField, ascending, limit, offset);
+    }
+
+    @Override
+    public Long countByManager(Long managerId) throws DatabaseException {
+        return count(String.format("manager_id = %d", managerId));
+    }
+
+    @Override
+    public List<Order> findAllAwaitingAnswer(String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
+        return findAll("manager_id IS NULL", orderField, ascending, limit, offset);
+    }
+
+    @Override
+    public Long countAwaitingAnswer() throws DatabaseException {
+        return count("manager_id IS NULL");
+    }
+
+    @Override
+    public List<Order> findAllAwaitingMaster(String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
+        return findAll("master_id IS NULL AND manager_id IS NOT NULL", orderField, ascending, limit, offset);
+    }
+
+    @Override
+    public Long countAwaitingMaster() throws DatabaseException {
+        return count("master_id IS NULL AND manager_id IS NOT NULL");
     }
 
 }

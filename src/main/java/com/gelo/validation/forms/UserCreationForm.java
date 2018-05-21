@@ -4,18 +4,13 @@ import com.gelo.model.domain.Role;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.validation.Valid;
-import com.gelo.validation.Validated;
 import com.gelo.validation.constants.Regexps;
-import com.gelo.model.domain.User;
 
 /**
  * The type User creation form.
+ * Is used when admin is registering new User
  */
-public class UserCreationForm extends Validated {
-    private String name;
-    private String email;
-    private String country;
-    private String password;
+public class UserCreationForm extends RegisterForm {
     private String roleId;
 
     /**
@@ -28,10 +23,7 @@ public class UserCreationForm extends Validated {
      * @param roleId   the role id
      */
     public UserCreationForm(String name, String email, String country, String password, String roleId) {
-        this.name = name;
-        this.email = email;
-        this.country = country;
-        this.password = password;
+        super(name, email, country, password);
         this.roleId = roleId;
     }
 
@@ -42,88 +34,13 @@ public class UserCreationForm extends Validated {
      */
     public User parseUser(){
         Long roleId = Long.parseLong(this.roleId);
-        return new User.UserBuilder().name(name)
-                .email(email)
-                .country(country)
-                .password(password)
+        return new User.UserBuilder()
+                .name(getName())
+                .email(getEmail())
+                .country(getCountry())
+                .password(getPassword())
                 .role(new Role(roleId, RoleType.values()[roleId.intValue()]))
                 .build();
-    }
-
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
-    @Valid(value = Regexps.STR_LEN, params = {"3", "50"})
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets name.
-     *
-     * @param name the name
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets email.
-     *
-     * @return the email
-     */
-    @Valid(Regexps.EMAIL)
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets email.
-     *
-     * @param email the email
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * Gets country.
-     *
-     * @return the country
-     */
-    @Valid(value = Regexps.STR_LEN, params = {"3", "25"})
-    public String getCountry() {
-        return country;
-    }
-
-    /**
-     * Sets country.
-     *
-     * @param country the country
-     */
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    /**
-     * Gets password.
-     *
-     * @return the password
-     */
-    @Valid(value = Regexps.STR_LEN, params = {"8", "20"})
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets password.
-     *
-     * @param password the password
-     */
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     /**

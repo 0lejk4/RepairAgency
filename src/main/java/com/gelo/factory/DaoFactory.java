@@ -1,12 +1,11 @@
 package com.gelo.factory;
 
-import com.gelo.model.dao.*;
-import com.gelo.model.dao.impl.OrderDaoImpl;
-import com.gelo.model.dao.impl.PermissionDaoImpl;
-import com.gelo.model.dao.impl.ReviewDaoImpl;
-import com.gelo.model.dao.impl.UserDaoImpl;
+import com.gelo.model.dao.OrderDao;
+import com.gelo.model.dao.PermissionDao;
 import com.gelo.model.dao.ReviewDao;
 import com.gelo.model.dao.UserDao;
+import com.gelo.model.dao.impl.OrderDaoImpl;
+import com.gelo.model.dao.impl.PermissionDaoImpl;
 import com.gelo.model.dao.impl.ReviewDaoImpl;
 import com.gelo.model.dao.impl.UserDaoImpl;
 
@@ -15,6 +14,7 @@ import com.gelo.model.dao.impl.UserDaoImpl;
  * Is mainly used in default constructors of service layers.
  */
 public class DaoFactory {
+    //Todo: Make this object pool or leave as it is if branch JdbcTemplate will be successful
 
     /**
      * Gets user dao instance.

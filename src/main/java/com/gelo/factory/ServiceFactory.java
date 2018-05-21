@@ -1,10 +1,10 @@
 package com.gelo.factory;
 
-import com.gelo.services.*;
+import com.gelo.services.OrderService;
+import com.gelo.services.ReviewService;
+import com.gelo.services.UserService;
 import com.gelo.services.impl.OrderServiceImpl;
 import com.gelo.services.impl.ReviewServiceImpl;
-import com.gelo.services.impl.UserServiceImpl;
-import com.gelo.services.UserService;
 import com.gelo.services.impl.UserServiceImpl;
 
 /**
@@ -12,7 +12,7 @@ import com.gelo.services.impl.UserServiceImpl;
  * Is mainly used in handlers to get service instance.
  */
 public class ServiceFactory {
-
+    //Todo: Make this object pool or leave as it is if branch JdbcTemplate will be successful
     /**
      * Gets user service instance.
      *

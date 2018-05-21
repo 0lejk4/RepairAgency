@@ -53,6 +53,15 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
     public abstract String getSelectQuery();
 
     /**
+     * Returns sql query to count all records
+     * <p/>
+     * SELECT * FROM [Table]
+     *
+     * @return the select query
+     */
+    public abstract String getCountQuery();
+
+    /**
      * Returns sql query to insert into table
      * <p/>
      * INSERT INTO [Table] ([column, column, ...]) VALUES (?, ?, ...);
@@ -108,6 +117,7 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
 
     /**
      * Inserts entity into table
+     *
      * @param object entity to be inserted
      * @throws DatabaseException exception thrown when exception occurs
      */
@@ -130,6 +140,7 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
 
     /**
      * Finds entity by primary key value
+     *
      * @param key key value
      * @return entity found or null
      * @throws DatabaseException exception thrown when exception occurs
@@ -159,6 +170,7 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
 
     /**
      * Updates entity
+     *
      * @param object entity used for update
      * @throws DatabaseException exception thrown when exception occurs
      */
@@ -182,6 +194,7 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
 
     /**
      * Deletes entity from table
+     *
      * @param object entity to be deleted
      * @throws DatabaseException exception thrown when exception occurs
      */
@@ -208,6 +221,7 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
 
     /**
      * Return list of all entities from table
+     *
      * @return list of entities
      * @throws DatabaseException exception thrown when exception occurs
      */
@@ -233,7 +247,7 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
         if (whereClause != null) {
             queryBuilder.append(" WHERE ").append(whereClause);
         }
-        if(ascending == null){
+        if (ascending == null) {
             ascending = true;
         }
         if (orderField != null) {
@@ -258,6 +272,33 @@ public abstract class AbstractJDBCDao<T extends Identified<PK>, PK extends Long>
         return list;
     }
 
-    //Todo: add protected generic count method like findAll(params) and use it for easier count methods for pagination
+    /**
+     * Method that could be used in derived classes to count
+     * records with some where clause if it is present
+     *
+     * @param whereClause some where clauses
+     * @return list of entities found using created query
+     * @throws DatabaseException exception thrown when exception occurs
+     */
+    protected Long count(String whereClause) throws DatabaseException {
+        Long count = 0L;
+
+        StringBuilder queryBuilder = new StringBuilder(getCountQuery());
+        if (whereClause != null) {
+            queryBuilder.append(" WHERE ").append(whereClause);
+        }
+
+        try (PreparedStatement statement = getConnection().prepareStatement(queryBuilder.toString())) {
+            ResultSet rs = statement.executeQuery();
+            if(rs.next()){
+                count = rs.getLong(1);
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            throw new DatabaseException(e);
+        }
+
+        return count;
+    }
 
 }

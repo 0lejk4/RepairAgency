@@ -4,7 +4,6 @@ import com.gelo.mock.entity.EntityMocks;
 import com.gelo.model.dao.ReviewDao;
 import com.gelo.model.dao.UserDao;
 import com.gelo.model.domain.Review;
-import com.gelo.model.domain.User;
 import com.gelo.model.exception.DatabaseException;
 import com.gelo.services.ReviewService;
 import org.junit.Assert;
@@ -17,8 +16,6 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class ReviewServiceImplTest {
     @Mock
@@ -49,8 +46,7 @@ public class ReviewServiceImplTest {
         ReviewService reviewService = new ReviewServiceImpl(userDao, reviewDao);
         Review review = EntityMocks.createReview();
 
-        Mockito.when(reviewDao.findByPK(3L))
-                .thenReturn(review);
+        Mockito.when(reviewDao.findByPK(3L)).thenReturn(review);
 
         Mockito.when(userDao.findByPK(review.getAuthor().getId())).thenReturn(review.getAuthor());
 
@@ -89,13 +85,13 @@ public class ReviewServiceImplTest {
 
         ReviewService reviewService = new ReviewServiceImpl(userDao, reviewDao);
 
-        Mockito.when(reviewDao.countAllByMasterId(masterId)).thenReturn(5);
+        Mockito.when(reviewDao.countAllByMasterId(masterId)).thenReturn(5L);
 
-        Assert.assertEquals(5, reviewService.countAllByMasterId(masterId));
+        Assert.assertEquals(5L, reviewService.countAllByMasterId(masterId).longValue());
 
         Mockito.doThrow(new DatabaseException()).when(reviewDao).countAllByMasterId(masterId);
 
-        Assert.assertEquals(0, reviewService.countAllByMasterId(masterId));
+        Assert.assertEquals(0L, reviewService.countAllByMasterId(masterId).longValue());
     }
 
     @Test

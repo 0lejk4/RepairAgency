@@ -1,15 +1,15 @@
 package com.gelo.validation.forms;
 
 import com.gelo.model.domain.Review;
+import com.gelo.validation.Form;
 import com.gelo.validation.Valid;
-import com.gelo.validation.Validated;
-import com.gelo.validation.constants.Regexps;
 import com.gelo.validation.constants.Regexps;
 
 /**
  * The type Review form.
+ * Is used when user creates review for master.
  */
-public class ReviewForm extends Validated {
+public class ReviewForm extends Form {
     private String masterId;
     private String title;
     private String text;

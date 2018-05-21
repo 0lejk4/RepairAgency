@@ -40,12 +40,12 @@ public interface ReviewService {
 
 
     /**
-     * Count all by master id int.
+     * Count all by master id Long.
      *
      * @param masterId the master id
-     * @return the int
+     * @return the Long
      */
-    int countAllByMasterId(Long masterId);
+    Long countAllByMasterId(Long masterId);
 
     /**
      * Can author review master boolean.

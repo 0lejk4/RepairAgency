@@ -10,5 +10,5 @@ public interface Identified<PK extends Serializable> {
     /**
      * @return primary key of entity
      */
-    public PK getId();
+    PK getId();
 }

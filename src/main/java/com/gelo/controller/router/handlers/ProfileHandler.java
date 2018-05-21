@@ -1,29 +1,31 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Review;
 import com.gelo.model.domain.User;
 import com.gelo.services.ReviewService;
 import com.gelo.services.UserService;
+import com.gelo.services.impl.PaginatorImpl;
 import com.gelo.util.Transport;
-import com.gelo.validation.forms.ReviewPaginationForm;
+import com.gelo.validation.pagination.ReviewPaginationForm;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Shows some users profile with all reviews it has.
  */
+@GetMapping
 public class ProfileHandler implements Handler {
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String profile_id_param = request.getParameter("profile_id");
         UserService userService = ServiceFactory.getUserServiceInstance();
         ReviewService reviewService = ServiceFactory.getReviewServiceInstance();
+        PaginatorImpl<Review> orderPaginationService = new PaginatorImpl<>();
         User loggedUser = (User) request.getSession(false).getAttribute("user");
         boolean isOwn = (profile_id_param == null);
 
@@ -44,8 +46,8 @@ public class ProfileHandler implements Handler {
         ReviewPaginationForm form = new ReviewPaginationForm(
                 request.getParameter("page"),
                 request.getParameter("count"),
-                request.getParameter("order_field"),
-                request.getParameter("ascending")
+                request.getParameter("ascending"),
+                request.getParameter("order_field")
         );
 
         User profile;
@@ -57,41 +59,29 @@ public class ProfileHandler implements Handler {
 
         request.setAttribute("profile_user", profile);
 
-        int all_count = reviewService.countAllByMasterId(profileId);
+        long allCount = reviewService.countAllByMasterId(profileId);
 
-        request.setAttribute("page_count", Math.ceil(((double) all_count) / 20));
-        request.setAttribute("all_count", all_count);
+        orderPaginationService.paginate(
+                form, () -> reviewService.getAllByMasterIdPaginated(
+                        profileId,
+                        form.getOrderField(),
+                        form.getAscending(),
+                        form.getCount(),
+                        (form.getPage() - 1) * form.getCount()),
+                allCount);
 
-        if (form.valid()) {
-            request.setAttribute("page_count", Math.ceil(((double) all_count) / form.getCount()));
+        request.setAttribute("all_count", allCount);
+        request.setAttribute("page_count", orderPaginationService.getPageCount());
+        request.setAttribute("order_field", orderPaginationService.getOrderField());
+        request.setAttribute("ascending", orderPaginationService.getAscending());
+        request.setAttribute("count", orderPaginationService.getCount());
+        request.setAttribute("page", orderPaginationService.getPage());
+        request.setAttribute("reviews", orderPaginationService.getEntities());
 
-
-            int firstPage = (form.getPage() - 1) * form.getCount();
-
-            List<Review> reviewList = reviewService.getAllByMasterIdPaginated(
-                    profileId,
-                    form.getOrderField(),
-                    form.getAscending(),
-                    form.getCount(),
-                    firstPage
-            );
-
-            request.setAttribute("order_field", form.getOrderField());
-            request.setAttribute("ascending", form.getAscending());
-            request.setAttribute("count", form.getCount());
-            request.setAttribute("page", form.getPage());
-
-            request.setAttribute("reviews", reviewList);
-        } else {
-            request.setAttribute("order_field", "id");
-            request.setAttribute("ascending", true);
-            request.setAttribute("count", 20);
-            request.setAttribute("page", 1);
-
-            request.setAttribute("reviews", Collections.emptyList());
+        if (orderPaginationService.isValid()) {
             request.setAttribute("alerts", form.getErrorList());
         }
 
-        return Transport.absForward("/profile.jsp");
+        return Transport.absolute("/profile.jsp");
     }
 }

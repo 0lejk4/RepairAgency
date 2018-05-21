@@ -3,17 +3,15 @@ package com.gelo.validation.forms;
 import com.gelo.model.domain.Role;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
-import com.gelo.validation.Valid;
-import com.gelo.validation.Validated;
-import com.gelo.validation.constants.Regexps;
-import com.gelo.model.domain.User;
+import com.gelo.validation.Form;
 import com.gelo.validation.Valid;
 import com.gelo.validation.constants.Regexps;
 
 /**
  * The type Register form.
+ * Is used when user is registering.
  */
-public class RegisterForm extends Validated {
+public class RegisterForm extends Form {
     private String name;
     private String email;
     private String country;

@@ -2,6 +2,8 @@ package com.gelo.validation.constants;
 
 /**
  * The interface Regexps.
+ * It contains Regexps needed in form validation process.
+ * In general constants are members of annotations
  */
 public interface Regexps {
     /**

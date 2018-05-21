@@ -6,7 +6,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Page Not Found</title>
+    <title>Server error - RepairAgency</title>
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/static/css/500.css"/>
     <c:import url="WEB-INF/jspf/includes.jsp"/>

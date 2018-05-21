@@ -1,12 +1,10 @@
 package com.gelo.model.dao.impl;
 
 import com.gelo.model.dao.PermissionDao;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.model.domain.Permission;
-import com.gelo.model.domain.PermissionType;
 import com.gelo.model.domain.Permission;
 import com.gelo.model.domain.PermissionType;
 import com.gelo.model.exception.DatabaseException;
+import com.gelo.util.constants.Queries;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.log4j.Logger;
 
@@ -28,12 +26,7 @@ public class PermissionDaoImpl extends ConnectibleImpl implements PermissionDao 
         ResultSet rs = null;
         Set<Permission> permissions = new HashSet<>();
         try (PreparedStatement ps = getConnection()
-                .prepareStatement("SELECT" +
-                        "  permission_id," +
-                        "  permissions.type permission_type" +
-                        " FROM role_permission" +
-                        "  INNER JOIN permissions ON permission_id = permissions.id" +
-                        " WHERE role_id = ?;")) {
+                .prepareStatement(Queries.PERMISSION_FIND_BY_ROLE_ID)) {
             ps.setLong(1, id);
             rs = ps.executeQuery();
             while (rs.next()) {

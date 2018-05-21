@@ -19,8 +19,8 @@ public class DataSource {
     private javax.sql.DataSource ds;
     private static Logger logger = Logger.getLogger(DataSource.class);
 
-    /**
-     * Loads properties for db from db-config.properties file
+    /*
+      Loads properties for db from db-config.properties file
      */
     static {
         try {
@@ -44,12 +44,12 @@ public class DataSource {
         return SingletonHolder.HOLDER_INSTANCE;
     }
 
+    /**
+     * Checks is mode is testing or not.
+     * Uses container specific connection pool using jndi if mode is not testing.
+     * Else uses DBCP library connection pool with properties from config file
+     */
     private DataSource() {
-        /**
-         * Checks is mode is testing or not.
-         * Uses container specific connection pool using jndi if mode is not testing.
-         * Else uses DBCP library connection pool with properties from config file
-         */
         if (properties.getProperty("mode").equals("test")) {
             ds = new BasicDataSource();
             ((BasicDataSource) ds).setDriverClassName(properties.getProperty("driverClass"));

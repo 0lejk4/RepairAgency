@@ -1,6 +1,7 @@
 package com.gelo.controller.router.handlers;
 
-import com.gelo.controller.router.security.PreAuthorize;
+import com.gelo.controller.router.annotation.PostMapping;
+import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Review;
 import com.gelo.model.domain.RoleType;
@@ -10,10 +11,6 @@ import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.Alert;
 import com.gelo.validation.formats.LongFormat;
-import com.gelo.validation.forms.ReviewForm;
-import com.gelo.factory.ServiceFactory;
-import com.gelo.model.domain.User;
-import com.gelo.util.Transport;
 import com.gelo.validation.forms.ReviewForm;
 
 import javax.servlet.ServletException;
@@ -28,6 +25,7 @@ import java.io.IOException;
  * Also prevents self reviewing.
  * All form errors are controlled by ReviewForm class
  */
+@PostMapping
 @PreAuthorize(role = RoleType.ROLE_USER)
 public class AddReviewHandler implements Handler {
     @Override
@@ -42,10 +40,10 @@ public class AddReviewHandler implements Handler {
             can_review = reviewService.canAuthorReviewMaster(user.getId(), format.parseLong());
         }else {
             request.setAttribute("alerts", Alert.single(Alert.danger("master.id.incorrect")));
-            return Transport.absForward(Paths.PROFILE_PAGE);
+            return Transport.absolute(Paths.PROFILE_PAGE);
         }
 
-        Transport transport = Transport.absForward("/app/profile?profile_id=" + format.parseLong());
+        Transport transport = Transport.absolute("/app/profile?profile_id=" + format.parseLong());
 
         if(!can_review){
             request.setAttribute("alerts", Alert.single(Alert.danger("cant.review")));

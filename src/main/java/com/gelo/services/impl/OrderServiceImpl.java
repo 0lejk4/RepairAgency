@@ -1,19 +1,20 @@
 package com.gelo.services.impl;
 
+import com.gelo.factory.DaoFactory;
 import com.gelo.model.dao.OrderDao;
 import com.gelo.model.dao.UserDao;
+import com.gelo.model.domain.Order;
 import com.gelo.model.domain.User;
 import com.gelo.model.exception.DatabaseException;
-import com.gelo.factory.DaoFactory;
-import com.gelo.model.domain.Order;
-import com.gelo.services.OrderService;
 import com.gelo.services.DataSource;
+import com.gelo.services.OrderService;
 import org.apache.commons.dbutils.DbUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * The type Order service.
@@ -42,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Fetches user entities for input order
+     *
      * @param o input order
      * @throws DatabaseException exception that can occur while working with dao
      */
@@ -63,40 +65,12 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
-
     /**
-     * Helper method to reduce boilerplate code
-     * @param qualifier dao method to be called
-     * @param number optional parameter need for some methods
-     * @return orders list or empty list if qualifier does not exist
-     * @throws DatabaseException exception that can occur while working with dao
+     * Method that generify findAll action using different Callable for this purposes
+     * @param callable - callable that returns the list of orders it is DAO call in general
+     * @return - list of orders
      */
-    private List<Order> useDaoByQualifierAndNumber(String qualifier, long number) throws DatabaseException {
-        switch (qualifier) {
-            case "ALL":
-                return orderDao.findAll();
-            case "AWAITING_ANSWER":
-                return orderDao.findAllAwaitingAnswer();
-            case "AWAITING_MASTER":
-                return orderDao.findAllAwaitingMaster();
-            case "BY_MASTER":
-                return orderDao.findAllByMaster(number);
-            case "BY_MANAGER":
-                return orderDao.findAllByManager(number);
-            case "BY_AUTHOR":
-                return orderDao.findAllByAuthor(number);
-            default:
-                return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Method that reduces boilerplate code using method
-     * @param qualifier for calling method that decides what dao method to use
-     * @param number for calling method that decides what dao method to use with this number as parameter
-     * @return order list fetched using dao
-     */
-    private List<Order> getAllOrdersByQualifierAndNumber(String qualifier, long number) {
+    private List<Order> findAllFromCallable(Callable<List<Order>> callable) {
         Connection conToUse = null;
         List<Order> orders;
         try {
@@ -104,12 +78,13 @@ public class OrderServiceImpl implements OrderService {
             conToUse.setAutoCommit(false);
             orderDao.setConnection(conToUse);
             userDao.setConnection(conToUse);
-            orders = useDaoByQualifierAndNumber(qualifier, number);
+
+            orders = callable.call();
             for (Order o : orders) {
                 populateUserFields(o);
             }
             conToUse.commit();
-        } catch (SQLException | DatabaseException e) {
+        } catch (Exception e) {
             DbUtils.rollbackAndCloseQuietly(conToUse);
             orders = null;
         } finally {
@@ -119,38 +94,85 @@ public class OrderServiceImpl implements OrderService {
         return orders;
     }
 
-    private List<Order> getAllOrdersByQualifier(String qualifier) {
-        return getAllOrdersByQualifierAndNumber(qualifier, -1);
+    /**
+     * Method that generify count action using different Callable for this purposes
+     * @param callable - callable that returns count orders it is DAO call in general
+     * @return - count of orders
+     */
+    private Long countFromCallable(Callable<Long> callable) {
+        Connection conToUse = null;
+        Long count = 0L;
+        try {
+            conToUse = DataSource.getInstance().getConnection();
+            conToUse.setAutoCommit(false);
+            orderDao.setConnection(conToUse);
+            userDao.setConnection(conToUse);
+
+            count = callable.call();
+
+            conToUse.commit();
+        } catch (Exception e) {
+            DbUtils.rollbackAndCloseQuietly(conToUse);
+        } finally {
+            DataSource.closeConnection(conToUse);
+        }
+
+        return count;
     }
 
     @Override
     public List<Order> findAll() {
-        return getAllOrdersByQualifier("ALL");
+        return findAllFromCallable(() -> orderDao.findAll());
     }
 
     @Override
-    public List<Order> findAllAwaitingAnswer() {
-        return getAllOrdersByQualifier("AWAITING_ANSWER");
+    public List<Order> findAllAwaitingAnswer(String orderField, boolean ascending, int limit, int offset) {
+        return findAllFromCallable(() -> orderDao.findAllAwaitingAnswer(orderField, ascending, limit, offset));
     }
 
     @Override
-    public List<Order> findAllAwaitingMaster() {
-        return getAllOrdersByQualifier("AWAITING_MASTER");
+    public Long countAwaitingAnswer() {
+        return countFromCallable(() -> orderDao.countAwaitingAnswer());
     }
 
     @Override
-    public List<Order> findAllByAuthorId(Long authorId) {
-        return getAllOrdersByQualifierAndNumber("BY_AUTHOR", authorId);
+    public List<Order> findAllAwaitingMaster(String orderField, boolean ascending, int limit, int offset) {
+        return findAllFromCallable(() -> orderDao.findAllAwaitingMaster(orderField, ascending, limit, offset));
     }
 
     @Override
-    public List<Order> findAllByMasterId(Long masterId) {
-        return getAllOrdersByQualifierAndNumber("BY_MASTER", masterId);
+    public Long countAwaitingMaster() {
+        return countFromCallable(() -> orderDao.countAwaitingMaster());
     }
 
     @Override
-    public List<Order> findAllByManagerId(Long managerId) {
-        return getAllOrdersByQualifierAndNumber("BY_MANAGER", managerId);
+    public List<Order> findAllByAuthorId(Long authorId, String orderField, boolean ascending, int limit, int offset) {
+        return findAllFromCallable(() -> orderDao.findAllByAuthor(authorId, orderField, ascending, limit, offset));
+    }
+
+    @Override
+    public Long countByAuthor(Long authorId) {
+        return countFromCallable(() -> orderDao.countByAuthor(authorId));
+    }
+
+    @Override
+    public List<Order> findAllByMasterId(Long masterId, String orderField, boolean ascending, int limit, int offset) {
+        return findAllFromCallable(() -> orderDao.findAllByMaster(masterId, orderField, ascending, limit, offset));
+    }
+
+    @Override
+    public Long countByMaster(Long masterId) {
+        return countFromCallable(() -> orderDao.countByMaster(masterId));
+    }
+
+    @Override
+    public List<Order> findAllByManagerId(Long managerId, String orderField, boolean ascending, int limit, int offset) {
+        return findAllFromCallable(() -> orderDao.findAllByManager(managerId, orderField, ascending, limit, offset));
+    }
+
+    @Override
+    public Long countByManager(Long managerId) {
+        return countFromCallable(() -> orderDao.countByManager(managerId));
     }
 
     @Override
@@ -162,9 +184,17 @@ public class OrderServiceImpl implements OrderService {
             conToUse.setAutoCommit(false);
             orderDao.setConnection(conToUse);
             userDao.setConnection(conToUse);
-            User manager = order.getManager();
-            manager.setActiveOrdersCount(manager.getActiveOrdersCount() + 1);
-            userDao.update(manager);
+
+            if (order.isAccepted()) {
+                User manager = order.getManager();
+                manager.setActiveOrdersCount(manager.getActiveOrdersCount() + 1);
+                userDao.update(manager);
+            } else {
+                User author = order.getAuthor();
+                author.setActiveOrdersCount(author.getActiveOrdersCount() - 1);
+                userDao.update(author);
+            }
+
 
             Order current = orderDao.findByPK(order.getId());
             populateUserFields(current);
@@ -246,27 +276,17 @@ public class OrderServiceImpl implements OrderService {
             orderDao.setConnection(conToUse);
             userDao.setConnection(conToUse);
 
-            User master = order.getMaster();
-            master.setActiveOrdersCount(master.getActiveOrdersCount() - 1);
-            master.setSummaryOrdersCount(master.getSummaryOrdersCount() + 1);
-
-            userDao.update(master);
-
             Order current = orderDao.findByPK(order.getId());
-            populateUserFields(current);
 
             current.setDone(order.isDone());
-            User author = current.getAuthor();
-            author.setActiveOrdersCount(author.getActiveOrdersCount() - 1);
-            author.setSummaryOrdersCount(author.getSummaryOrdersCount() + 1);
+            populateUserFields(current);
 
-            userDao.update(author);
+            for (User u : Arrays.asList(current.getMaster(), current.getAuthor(), current.getManager())) {
+                u.setActiveOrdersCount(u.getActiveOrdersCount() - 1);
+                u.setSummaryOrdersCount(u.getSummaryOrdersCount() + 1);
+                userDao.update(u);
+            }
 
-            User manager = current.getManager();
-            manager.setActiveOrdersCount(manager.getActiveOrdersCount() - 1);
-            manager.setSummaryOrdersCount(manager.getSummaryOrdersCount() + 1);
-
-            userDao.update(manager);
 
             orderDao.update(current);
             conToUse.commit();

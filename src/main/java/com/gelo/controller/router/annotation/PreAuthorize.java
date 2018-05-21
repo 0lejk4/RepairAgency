@@ -1,7 +1,5 @@
-package com.gelo.controller.router.security;
+package com.gelo.controller.router.annotation;
 
-import com.gelo.model.domain.PermissionType;
-import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.PermissionType;
 import com.gelo.model.domain.RoleType;
 

@@ -12,11 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The type Validated.
+ * The type Form.
  * Classes should extend it in order to get ability to be validated.
  */
-public abstract class Validated {
-    private static final Logger logger = Logger.getLogger(Validated.class);
+public abstract class Form {
+    private static final Logger logger = Logger.getLogger(Form.class);
     private final List<Alert> errorList = new ArrayList<>();
 
     /**
@@ -53,7 +53,7 @@ public abstract class Validated {
      * @param source class that should be validated
      * @return if class was valid or not
      */
-    private static boolean isAllValid(Validated source) {
+    private static boolean isAllValid(Form source) {
         boolean valid = false;
         try {
             valid = true;
@@ -63,6 +63,7 @@ public abstract class Validated {
                 Method fieldGetter = propertyDescriptor.getReadMethod();
                 //Should skip getClass
                 if (!fieldGetter.getName().equals("getClass")) {
+
                     Valid annotation;
                     //No Valid annotation = no need to validate
                     if (fieldGetter.isAnnotationPresent(Valid.class)) {
@@ -75,7 +76,7 @@ public abstract class Validated {
                     //Nullable? write default value and continue
                     if (fieldAsObj == null && fieldGetter.isAnnotationPresent(Nullable.class)) {
                         Nullable nullable = fieldGetter.getAnnotation(Nullable.class);
-                        if (!nullable.value().equals("")) {
+                        if (!nullable.value().equals("STATUS_CODE.I_AM_A_TEAPOT")) {
                             propertyDescriptor.getWriteMethod().invoke(source, nullable.value());
                         }
                         continue;

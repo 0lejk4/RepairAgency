@@ -4,8 +4,9 @@
          id="WebApp_ID" version="3.0">
     <display-name>RepairAgency</display-name>
     <welcome-file-list>
-        <welcome-file>login.jsp</welcome-file>
+        <welcome-file>app/home</welcome-file>
     </welcome-file-list>
+
 
     <error-page>
         <error-code>404</error-code>

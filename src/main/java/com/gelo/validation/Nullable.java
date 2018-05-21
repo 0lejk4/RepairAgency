@@ -18,5 +18,5 @@ public @interface Nullable {
      *
      * @return the string
      */
-    String value() default "";
+    String value() default "STATUS_CODE.I_AM_A_TEAPOT";
 }

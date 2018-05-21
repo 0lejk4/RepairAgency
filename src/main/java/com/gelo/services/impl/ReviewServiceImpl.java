@@ -1,12 +1,12 @@
 package com.gelo.services.impl;
 
+import com.gelo.factory.DaoFactory;
 import com.gelo.model.dao.ReviewDao;
 import com.gelo.model.dao.UserDao;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.factory.DaoFactory;
 import com.gelo.model.domain.Review;
-import com.gelo.services.ReviewService;
+import com.gelo.model.exception.DatabaseException;
 import com.gelo.services.DataSource;
+import com.gelo.services.ReviewService;
 import org.apache.commons.dbutils.DbUtils;
 
 import java.sql.Connection;
@@ -115,9 +115,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public int countAllByMasterId(Long masterId) {
+    public Long countAllByMasterId(Long masterId) {
         Connection connection = null;
-        int count = 0;
+        Long count = 0L;
         try {
             connection = DataSource.getInstance().getConnection();
             connection.setAutoCommit(false);

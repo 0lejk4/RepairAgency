@@ -1,7 +1,9 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.PostMapping;
 import com.gelo.util.Transport;
 import org.apache.log4j.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +15,7 @@ import java.io.IOException;
  * Handles logout action.
  * Logs user info that logout`s and purifies session.
  */
+@PostMapping
 public class LogoutHandler implements Handler {
     private static Logger logger = Logger.getLogger(LogoutHandler.class);
 

@@ -1,7 +1,8 @@
 package com.gelo.model.exception;
 
 /**
- * The type Database exception.
+ * The type Database exception. Is used in DAO`s in order
+ * to create abstraction from the database specific Exceptions.
  */
 public class DatabaseException extends Exception {
     private String exceptionMessage = "";

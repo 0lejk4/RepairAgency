@@ -36,7 +36,7 @@ public class Transport {
      * @param url the url
      * @return the transport
      */
-    public static Transport absForward(String url) {
+    public static Transport absolute(String url) {
         return new Transport(url, TransportType.ABSOLUTE_FORWARD);
     }
 
@@ -46,7 +46,7 @@ public class Transport {
      * @param url the url
      * @return the transport
      */
-    public static Transport relForward(String url) {
+    public static Transport relative(String url) {
         return new Transport(url, TransportType.RELATIVE_FORWARD);
     }
 

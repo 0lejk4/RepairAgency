@@ -2,6 +2,7 @@ package com.gelo.mock.entity;
 
 import com.gelo.model.domain.*;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +48,18 @@ public class EntityMocks {
         ));
     }
 
+    public static Order createTestOrder() {
+        return new Order(1L,
+                createTestUser(),
+                "Вітаю, здається зламався акамулятор.",
+                new BigDecimal(547),
+                createTestUser(),
+                createTestUser(),
+                "Справді зламався акамулятор. Ми досить швидко відремонтуємо його.",
+                true,
+                true);
+    }
+
     public static User createTestUser2() {
         return new User.UserBuilder()
                 .name("Test")
@@ -63,6 +76,8 @@ public class EntityMocks {
                 .name("Oleg")
                 .email("test@test.com")
                 .country("Ukraine")
+                .activeOrdersCount(0)
+                .summaryOrdersCount(6)
                 .password("asda213dasd")
                 .role(new Role(1L, RoleType.ROLE_USER, createUserPermissions()))
                 .build();

@@ -2,7 +2,6 @@ package com.gelo.controller.router;
 
 
 import com.gelo.util.Transport;
-import com.gelo.util.Transport;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -14,5 +13,5 @@ import java.io.IOException;
  * to choose what handler to use and how everything should happen.
  */
 public interface Router {
-    Transport handle(String path, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
+    Transport handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
 }

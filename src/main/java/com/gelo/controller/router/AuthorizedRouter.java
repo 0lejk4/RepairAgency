@@ -1,9 +1,11 @@
 package com.gelo.controller.router;
 
+import com.gelo.controller.router.annotation.GetMapping;
+import com.gelo.controller.router.annotation.PostMapping;
+import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.controller.router.handlers.Handler;
 import com.gelo.model.domain.PermissionType;
 import com.gelo.model.domain.User;
-import com.gelo.controller.router.security.PreAuthorize;
 import com.gelo.util.SecurityUtils;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
@@ -19,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.gelo.controller.router.annotation.GetMapping.GET_STR;
+import static com.gelo.controller.router.annotation.PostMapping.POST_STR;
+
 /**
  * Thread-safe singleton router that is instantiated with first servlet call.
  * This implementation of router looks for PreAuthorize annotation and does all needed authorization.
@@ -27,11 +32,12 @@ import java.util.Properties;
 public class AuthorizedRouter implements Router {
     private static volatile AuthorizedRouter instance;
 
+
     /**
      * Return singleton instance of router
      *
      * @param routingFileName file with handler mapping
-     * @return Router
+     * @return Router instance
      */
     public static AuthorizedRouter getInstance(String routingFileName) {
         AuthorizedRouter localInstance = instance;
@@ -53,6 +59,16 @@ public class AuthorizedRouter implements Router {
      */
     private final Map<String, Handler> routes = new HashMap<>();
 
+    /**
+     * Transport that is used for '/' path
+     */
+    private final Transport default_transport = Transport.redirect(Paths.HOME_PAGE);
+
+    /**
+     * Transport that is used to show 404 error page
+     */
+    private final Transport not_found_transport = Transport.absolute(Paths.NOT_FOUND);
+
 
     /**
      * Constructor that reads all handlers from file.
@@ -61,7 +77,6 @@ public class AuthorizedRouter implements Router {
      */
     private AuthorizedRouter(String routesFile) {
         Properties properties = new Properties();
-
         try {
             properties.load(AuthorizedRouter.class.getClassLoader()
                     .getResourceAsStream(routesFile));
@@ -69,11 +84,14 @@ public class AuthorizedRouter implements Router {
             e.printStackTrace();
             return;
         }
+        //Loop through paths
         for (Object key : properties.keySet()) {
             String path = (String) key;
             try {
+                //Try getting handler with given full name
                 Class<?> described = Class.forName(properties.getProperty(path));
 
+                //Implements Handler ?
                 if (Handler.class.isAssignableFrom(described)) {
                     Class<? extends Handler> handlerClazz = described.asSubclass(Handler.class);
 
@@ -90,6 +108,34 @@ public class AuthorizedRouter implements Router {
                 logger.warn(String.format("Error adding handlers for path = %s", path), e);
             }
         }
+    }
+
+    /**
+     * Method that checks if the request method matches the one placed on the Handler Class,
+     * if there is no marker annotations method can be used for any request method.
+     * In amount of such annotations can grow to be able to handle different request methods.
+     *
+     * @param handler handler which is going to be authorized
+     * @param request request to look-up for user in session
+     * @return true if method matches and handler can be used with that request method
+     */
+    private boolean checkMethod(Class<? extends Handler> handler, HttpServletRequest request) {
+        GetMapping get = handler.getAnnotation(GetMapping.class);
+        PostMapping post = handler.getAnnotation(PostMapping.class);
+
+        if (get == null && post == null) {
+            return true;
+        }
+
+        if (get != null && GET_STR.equals(request.getMethod())) {
+            return true;
+        }
+
+        if (post != null && POST_STR.equals(request.getMethod())) {
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -110,12 +156,19 @@ public class AuthorizedRouter implements Router {
 
         User user = (User) request.getSession(false).getAttribute("user");
 
+        //No user in session scope so roles or permissions cant be matched
+        if (user == null) {
+            return false;
+        }
+
+        //Check if user has Role
         if (SecurityUtils.hasRole(user, preAuthorize.role())) {
             return true;
         }
 
         boolean hasAllPermissions = true;
 
+        //Check if user has Permission
         for (PermissionType pT : preAuthorize.permissions()) {
             if (!SecurityUtils.hasPermission(user, pT)) {
                 hasAllPermissions = false;
@@ -129,20 +182,26 @@ public class AuthorizedRouter implements Router {
 
     /**
      * Specific authorized implementation of router`s handle method
-     * @param path path requested
+     *
      * @return Transport action that should happen next
      */
-    public Transport handle(String path, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public Transport handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String path = request.getRequestURI();
+        if (path.equals("/")) return default_transport;
+
         Handler handler = routes.get(path);
-        Transport notFound = Transport.absForward(Paths.NOT_FOUND);
 
-        if (handler == null) return notFound;
+        //No handler - not found
+        if (handler == null) return not_found_transport;
 
+        //Check if user can access
         boolean authorized = preAuthorize(handler.getClass(), request);
 
+        boolean requestMethodMatches = checkMethod(handler.getClass(), request);
 
-        return authorized
+        //Not authorized - not found, user should not know what page exists but he cant access
+        return (authorized && requestMethodMatches)
                 ? handler.execute(request, response)
-                : notFound;
+                : not_found_transport;
     }
 }

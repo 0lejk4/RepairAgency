@@ -1,6 +1,5 @@
 package com.gelo.model.dao;
 
-import com.gelo.model.exception.DatabaseException;
 import com.gelo.model.domain.Review;
 import com.gelo.model.exception.DatabaseException;
 
@@ -30,9 +29,11 @@ public interface ReviewDao extends Connectible {
     /**
      * Find all review`s by master`s id paginated.
      *
-     * @param masterId the master id
-     * @param limit    the limit
-     * @param offset   the offset
+     * @param masterId   the master id
+     * @param orderField the order field
+     * @param ascending  the ascending
+     * @param limit      the limit
+     * @param offset     the offset
      * @return the list
      * @throws DatabaseException the database exception
      */
@@ -43,10 +44,10 @@ public interface ReviewDao extends Connectible {
      * Count all orders for master with id.
      *
      * @param masterId the master id
-     * @return the int
+     * @return the Long
      * @throws DatabaseException the database exception
      */
-    int countAllByMasterId(Long masterId) throws DatabaseException;
+    Long countAllByMasterId(Long masterId) throws DatabaseException;
 
     /**
      * Can author review master.

@@ -1,15 +1,14 @@
 package com.gelo.validation.forms;
 
-import com.gelo.validation.Valid;
-import com.gelo.validation.Validated;
-import com.gelo.validation.constants.Regexps;
+import com.gelo.validation.Form;
 import com.gelo.validation.Valid;
 import com.gelo.validation.constants.Regexps;
 
 /**
  * The type Login form.
+ * Is used when user is logging in.
  */
-public class LoginForm extends Validated {
+public class LoginForm extends Form {
     private String email;
     private String password;
 

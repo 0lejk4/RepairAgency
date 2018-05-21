@@ -1,17 +1,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="auth" uri="/authtags" %>
-<%@ page import="com.gelo.model.domain.PermissionType" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
 <html>
 <head>
-    <title>Order</title>
+    <title>Admin Page - RepairAgency</title>
     <c:import url="WEB-INF/jspf/includes.jsp"/>
-
 </head>
-<body>
+<body style="background: #232741 50% 50%;">
 
 <c:import url="WEB-INF/jspf/header.jsp"/>
 <div class="container-fluid">
@@ -99,7 +97,7 @@
                                         <a href="<c:url value="/app/profile?profile_id=${order.author.id}"/>">${order.author.name}</a>
                                     </td>
                                     <td>${order.authorDescription}</td>
-                                    <td>${order.price}</td>
+                                    <td>${order.price}${order.price == null?'':'₴'}</td>
                                     <td>
                                         <a href="<c:url value="/app/profile?profile_id=${order.master.id}"/>">${order.master.name}</a>
                                     </td>

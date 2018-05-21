@@ -2,11 +2,15 @@
 <%@ page contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
 <%@ taglib prefix="info" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="${sessionScope['language']}"/>
+<fmt:setBundle basename="repair_agency_localization"/>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Login Page</title>
+    <title>Login Page - RepairAgency</title>
     <c:import url="WEB-INF/jspf/includes.jsp"/>
     <script type="text/javascript" src="${pageContext.request.contextPath}/static/js/particles.min.js"></script>
     <script type="text/javascript">
@@ -20,30 +24,34 @@
 </head>
 <body>
 <%--Todo: localizate--%>
-<div id="login-overlay" class="modal-dialog" style="z-index: 9999;">
+<div id="login-overlay" class="modal-dialog modal-lg" style="z-index: 9999;">
     <div class="modal-content">
         <div class="modal-header">
-            <h4 class="modal-title" id="myModalLabel">Login to Repair Agency</h4>
+            <h4 class="modal-title" id="myModalLabel"><fmt:message key="login.header"/></h4>
         </div>
         <div class="modal-body">
             <div class="row">
                 <div class="col-6">
                     <div class="card bg-light card-body mb-3">
                         <info:toast alerts="${requestScope['alerts']}"/>
-                        <form action="${pageContext.request.contextPath}/app/login" method="post">
+                        <form action="<c:url value="/app/language"/>" method="post">
                             <div class="form-group">
-                                <label for="language">Language</label>
-                                <select id="language" class="form-control" name="language">
-                                    <option value="en" ${language == 'en' ? 'selected' : ''}>
-                                        <span class="flag-icon flag-icon-us"></span> English
+                                <label for="language"><fmt:message key="field.language"/> </label>
+                                <select onchange="submit()" id="language" class="form-control" name="language">
+                                    <option value="en" ${sessionScope.language == 'en' ? 'selected' : ''}>
+                                        <span class="flag-icon flag-icon-us"></span> <fmt:message
+                                            key="header.language.english"/>
                                     </option>
-                                    <option value="uk" ${language == 'uk' ? 'selected' : ''}>
-                                        <span class="flag-icon flag-icon-ua"></span> Ukrainian
+                                    <option value="uk" ${sessionScope.language == 'uk' ? 'selected' : ''}>
+                                        <span class="flag-icon flag-icon-ua"></span> <fmt:message
+                                            key="header.language.ukrainian"/>
                                     </option>
                                 </select>
                             </div>
+                        </form>
+                        <form action="${pageContext.request.contextPath}/app/login" method="post">
                             <div class="form-group">
-                                <label for="email">Email</label>:
+                                <label for="email"><fmt:message key="field.email"/></label>:
                                 <input type="text"
                                        id="email"
                                        name="email"
@@ -52,7 +60,7 @@
                                        placeholder="Username"/>
                             </div>
                             <div class="form-group">
-                                <label for="password">Password</label>:
+                                <label for="password"><fmt:message key="field.password"/></label>:
                                 <input type="password"
                                        id="password"
                                        name="password"
@@ -61,12 +69,12 @@
                             </div>
                             <div class="form-group">
                                 <div class="row">
-                                    <div class="col-sm-6 col-sm-offset-3">
+                                    <div class="mx-auto">
                                         <input type="submit"
                                                name="login-submit"
                                                id="login-submit"
                                                class="form-control btn btn-info"
-                                               value="Log In"/>
+                                               value="<fmt:message key="login.submit"/>"/>
                                     </div>
                                 </div>
                             </div>
@@ -74,17 +82,33 @@
                     </div>
                 </div>
                 <div class="col-6">
-                    <p class="lead">Register now for <span class="text-success">FREE</span> to create your first order
+                    <p class="lead"><fmt:message key="login.register.now"/> <span class="text-success"><fmt:message
+                            key="phrase.free"/> </span> <fmt:message key="login.register.to"/>
                     </p>
                     <ul class="list-unstyled" style="line-height: 2">
-                        <li><span class="fa fa-check text-success"></span> Faster order callback</li>
-                        <li><span class="fa fa-check text-success"></span> Great working hours</li>
-                        <li><span class="fa fa-check text-success"></span> Best workers in city</li>
-                        <li><span class="fa fa-check text-success"></span> Good discounts for constantly customers</li>
-                        <li><span class="fa fa-check text-success"></span> We love what we do</li>
+                        <li><span class="fa fa-check text-success"></span> <fmt:message key="login.advantage.callback"/>
+                        </li>
+                        <li><span class="fa fa-check text-success"></span> <fmt:message key="login.advantage.hours"/>
+                        </li>
+                        <li><span class="fa fa-check text-success"></span> <fmt:message key="login.advantage.workers"/>
+                        </li>
+                        <li><span class="fa fa-check text-success"></span> <fmt:message key="login.advantage.opinion"/>
+                        </li>
+                        <li><span class="fa fa-check text-success"></span> <fmt:message key="login.advantage.love"/>
+                        </li>
                     </ul>
-                    <p><a href="${pageContext.request.contextPath}/register.jsp">Yes please, register now!</a>
-                    </p>
+
+                    <h3 class="row">
+                        <a class="mx-auto badge badge-info" href="<c:url value="/register.jsp"/>"><fmt:message
+                                key="register.please"/> </a>
+                    </h3>
+
+
+                    <h3 class="row">
+                        <a class="mx-auto badge badge-light" href="<c:url value="/app/home"/>"><i
+                                class="fas fa-home"></i><fmt:message key="header.home"/></a>
+                    </h3>
+
                 </div>
             </div>
         </div>

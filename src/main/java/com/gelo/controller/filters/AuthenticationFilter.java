@@ -1,9 +1,8 @@
 package com.gelo.controller.filters;
 
-import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.User;
-import com.gelo.services.UserService;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -21,7 +20,7 @@ import java.io.IOException;
 @WebFilter("/AuthenticationFilter")
 public class AuthenticationFilter implements Filter {
 
-    private Logger logger = Logger.getLogger(AuthenticationFilter.class);
+    private Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     public void init(FilterConfig fConfig) throws ServletException {
         logger.info("Authentication Filter Initialized");
@@ -42,21 +41,17 @@ public class AuthenticationFilter implements Filter {
             user = (User) session.getAttribute("user");
         }
 
-        if (session != null && user != null) {
-            UserService userService = ServiceFactory.getUserServiceInstance();
-            session.setAttribute("user", userService.findByEmail(user.getEmail()));
-            chain.doFilter(request, response);
-        } else if (uri.endsWith("/app/login")
+        if (session != null && user != null
+                || uri.endsWith("/app/login")
                 || uri.endsWith("/app/register")
                 || uri.endsWith("/app/language")
-                || uri.endsWith("/app/home")) {
+                || uri.endsWith("/app/home")
+                || uri.endsWith("/")) {
             chain.doFilter(request, response);
         } else {
-            logger.error("Unauthorized access request for resource::" + uri);
+            logger.error("Unauthorized access request for resource::{}", uri);
             res.sendRedirect("/login.jsp");
         }
-
-
     }
 
 }
