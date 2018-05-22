@@ -6,6 +6,7 @@
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
 <jsp:useBean id="orders" scope="request" type="java.util.List<com.gelo.model.domain.Order>"/>
+
 <html>
 <head>
     <title>Master page - RepairAgency</title>

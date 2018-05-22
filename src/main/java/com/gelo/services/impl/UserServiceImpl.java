@@ -2,23 +2,25 @@ package com.gelo.services.impl;
 
 import com.gelo.model.dao.PermissionDao;
 import com.gelo.model.dao.UserDao;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.factory.DaoFactory;
 import com.gelo.model.domain.User;
+import com.gelo.persistance.exception.DatabaseRuntimeException;
+import com.gelo.persistance.exception.TransactionRuntimeException;
+import com.gelo.persistance.transaction.TransactionManager;
 import com.gelo.services.UserService;
-import com.gelo.services.DataSource;
-import org.apache.commons.dbutils.DbUtils;
+import com.gelo.util.BeanStorage;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
  * The type User service.
  */
 public class UserServiceImpl implements UserService {
+    private static final Logger logger = LogManager.getLogger(UserServiceImpl.class);
     private UserDao userDao;
     private PermissionDao permissionDao;
+    private TransactionManager transactionManager = BeanStorage.INSTANCE.get(TransactionManager.class);
 
     /**
      * Instantiates a new User service.
@@ -31,132 +33,76 @@ public class UserServiceImpl implements UserService {
         this.permissionDao = permissionDao;
     }
 
-    /**
-     * Instantiates a new User service.
-     */
-    public UserServiceImpl() {
-        this(DaoFactory.getUserDaoInstance(), DaoFactory.getPermissionDaoInstance());
-    }
 
     @Override
     public List<User> findAll() {
-        Connection connection = null;
-        List<User> users = null;
         try {
-            connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            userDao.setConnection(connection);
-            users = userDao.findAll();
-            connection.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(connection);
-        } finally {
-            DataSource.closeConnection(connection);
+            return userDao.findAll();
+        } catch (DatabaseRuntimeException e) {
+            logger.error(e);
+            return null;
         }
-
-        return users;
     }
 
     @Override
     public List<User> findFiveBestMasters() {
-        Connection connection = null;
-        List<User> users = null;
         try {
-            connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            userDao.setConnection(connection);
-            users = userDao.findFiveBestMasters();
-            connection.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(connection);
-        } finally {
-            DataSource.closeConnection(connection);
+            return userDao.findFiveBestMasters();
+        } catch (DatabaseRuntimeException e) {
+            logger.error(e);
+            return null;
         }
-
-        return users;
     }
 
     @Override
     public boolean save(User user) {
-        Connection conToUse = null;
-        boolean status = true;
         try {
-            conToUse = DataSource.getInstance().getConnection();
-            conToUse.setAutoCommit(false);
-            userDao.setConnection(conToUse);
             userDao.persist(user);
-            conToUse.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(conToUse);
-            status = false;
-        } finally {
-            DataSource.closeConnection(conToUse);
+        } catch (DatabaseRuntimeException e) {
+            logger.error(e);
+            return false;
         }
-
-        return status;
+        return true;
     }
 
 
     @Override
     public User findByEmail(String email) {
-        Connection conToUse = null;
-        User user = null;
+        final Object[] result = new Object[1];
+
         try {
-            conToUse = DataSource.getInstance().getConnection();
-            conToUse.setAutoCommit(false);
-            userDao.setConnection(conToUse);
-            permissionDao.setConnection(conToUse);
-            user = userDao.findByEmail(email);
-            if (user == null) return null;
-            user.getRole().setPermissions(permissionDao.getPermissionsByRoleId(user.getRole().getId()));
-            conToUse.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(conToUse);
-        } finally {
-            DataSource.closeConnection(conToUse);
+            transactionManager.tx(() -> {
+                User user = userDao.findByEmail(email);
+                if (user == null) return;
+                user.getRole().setPermissions(permissionDao.getPermissionsByRoleId(user.getRole().getId()));
+                result[0] = user;
+            });
+        } catch (DatabaseRuntimeException | TransactionRuntimeException e) {
+            logger.error(e);
+            return null;
         }
 
-        return user;
+        return (User) result[0];
     }
 
 
     @Override
     public boolean emailTaken(String email) {
-        Connection conToUse = null;
-        boolean taken;
         try {
-            conToUse = DataSource.getInstance().getConnection();
-            conToUse.setAutoCommit(false);
-            userDao.setConnection(conToUse);
-            taken = userDao.emailTaken(email);
-            conToUse.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(conToUse);
-            taken = true;
-        } finally {
-            DataSource.closeConnection(conToUse);
+            return userDao.emailTaken(email);
+        } catch (DatabaseRuntimeException e) {
+            logger.error(e);
+            return true;
         }
-
-        return taken;
     }
 
     @Override
     public User findById(Long id) {
-        Connection conToUse = null;
-        User user = null;
         try {
-            conToUse = DataSource.getInstance().getConnection();
-            conToUse.setAutoCommit(false);
-            userDao.setConnection(conToUse);
-            user = userDao.findByPK(id);
-            if (user == null) return null;
-            conToUse.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(conToUse);
-        } finally {
-            DataSource.closeConnection(conToUse);
+            return userDao.findByPK(id);
+        } catch (DatabaseRuntimeException e) {
+            logger.error(e);
+            return null;
         }
-
-        return user;
     }
 }

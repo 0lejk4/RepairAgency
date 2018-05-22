@@ -1,14 +1,13 @@
 package com.gelo.controller.router.handlers;
 
-import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
-import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.services.OrderService;
 import com.gelo.services.Paginator;
 import com.gelo.services.impl.PaginatorImpl;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.pagination.OrderPaginationForm;
@@ -17,12 +16,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-@GetMapping
 @PreAuthorize(role = RoleType.ROLE_MASTER)
 public class MasterHistoryHandler implements Handler {
+    OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        OrderService orderService = ServiceFactory.getOrderServiceInstance();
         Paginator<Order> orderPaginationService = new PaginatorImpl<>();
 
         OrderPaginationForm form = new OrderPaginationForm(
@@ -55,7 +53,7 @@ public class MasterHistoryHandler implements Handler {
         request.setAttribute("page", orderPaginationService.getPage());
         request.setAttribute("workHistory", orderPaginationService.getEntities());
 
-        if (orderPaginationService.isValid()) {
+        if (!orderPaginationService.isValid()) {
             request.setAttribute("alerts", form.getErrorList());
         }
 

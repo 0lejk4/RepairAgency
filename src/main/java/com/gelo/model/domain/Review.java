@@ -146,4 +146,6 @@ public class Review implements Serializable, Identified<Long> {
     public void setMasterId(Long masterId) {
         this.masterId = masterId;
     }
+
+
 }

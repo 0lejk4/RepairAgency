@@ -2,12 +2,12 @@ package com.gelo.controller.router.handlers;
 
 import com.gelo.controller.router.annotation.PostMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
-import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.services.OrderService;
 import com.gelo.services.UserService;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.Alert;
@@ -28,6 +28,8 @@ import static com.gelo.validation.Alert.single;
 @PostMapping
 @PreAuthorize(role = RoleType.ROLE_MASTER)
 public class MasterEnrollHandler implements Handler {
+    OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);
+    UserService userService = BeanStorage.INSTANCE.get(UserService.class);
 
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -38,7 +40,6 @@ public class MasterEnrollHandler implements Handler {
             request.setAttribute("alerts", single(Alert.danger("master.too.much.orders")));
             return Transport.absolute(Paths.HOME_PAGE);
         }
-        OrderService orderService = ServiceFactory.getOrderServiceInstance();
         LongFormat format = new LongFormat(request.getParameter("order_id"));
 
         if (!format.valid()) {
@@ -56,7 +57,6 @@ public class MasterEnrollHandler implements Handler {
             request.setAttribute("alerts", single(Alert.success("went.wrong")));
         }
 
-        UserService userService = ServiceFactory.getUserServiceInstance();
         request.getSession().setAttribute("user", userService.findByEmail(loggedUser.getEmail()));
 
         return Transport.absolute(Paths.MASTER_PAGE);

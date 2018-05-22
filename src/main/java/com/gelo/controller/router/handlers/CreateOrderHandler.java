@@ -2,12 +2,12 @@ package com.gelo.controller.router.handlers;
 
 import com.gelo.controller.router.annotation.PostMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
-import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.services.OrderService;
 import com.gelo.services.UserService;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.Alert;
@@ -29,6 +29,9 @@ import static com.gelo.validation.Alert.single;
 @PostMapping
 @PreAuthorize(role = RoleType.ROLE_USER)
 public class CreateOrderHandler implements Handler {
+    UserService userService = BeanStorage.INSTANCE.get(UserService.class);
+    OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);
+
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         User loggedUser = (User) request.getSession().getAttribute("user");
@@ -40,7 +43,6 @@ public class CreateOrderHandler implements Handler {
                 request.getParameter("authorDescription")
         );
         if (form.valid()) {
-            OrderService orderService = ServiceFactory.getOrderServiceInstance();
             Order order = form.parseOrder();
             order.setAuthor(loggedUser);
             boolean success = orderService.saveOrder(order);
@@ -52,8 +54,6 @@ public class CreateOrderHandler implements Handler {
         } else {
             request.setAttribute("alerts", form.getErrorList());
         }
-
-        UserService userService = ServiceFactory.getUserServiceInstance();
         request.getSession().setAttribute("user", userService.findByEmail(loggedUser.getEmail()));
 
         return Transport.absolute(Paths.ORDER_CREATE_PAGE);

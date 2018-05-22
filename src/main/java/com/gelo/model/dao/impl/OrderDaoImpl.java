@@ -1,185 +1,140 @@
 package com.gelo.model.dao.impl;
 
 import com.gelo.model.dao.OrderDao;
-import com.gelo.model.dao.generic.impl.AbstractJDBCDao;
+import com.gelo.model.dao.generic.GenericDao;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.User;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.util.constants.Queries;
+import com.gelo.model.mapper.LongMapper;
+import com.gelo.model.mapper.OrderMapper;
+import com.gelo.persistance.ConnectionManager;
+import com.gelo.persistance.JdbcTemplate;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
  * The type Order dao.
  */
-public class OrderDaoImpl extends AbstractJDBCDao<Order, Long> implements OrderDao {
+public class OrderDaoImpl implements OrderDao, GenericDao<Order, Long> {
+    private final JdbcTemplate jdbcTemplate;
+    private final OrderMapper orderMapper = new OrderMapper();
+    private final LongMapper longMapper = new LongMapper();
+
+    private static final String FIND_ALL_BY_AUTHOR = "SELECT * FROM orders where orders.author_id = ?";
+    private static final String COUNT_ALL_BY_AUTHOR = "SELECT count(*) FROM orders where orders.author_id = ?;";
+    private static final String FIND_ALL_BY_MASTER = "SELECT * FROM orders where orders.master_id = ? ";
+    private static final String COUNT_ALL_BY_MASTER = "SELECT count(*) FROM orders where orders.master_id = ?;";
+    private static final String FIND_ALL_BY_MANAGER = "SELECT * FROM orders where orders.manager_id = ? ";
+    private static final String COUNT_ALL_BY_MANAGER = "SELECT count(*) FROM orders where orders.manager_id = ?;";
+    private static final String FIND_ALL_AWAITING_ANSWER = "SELECT * FROM orders where orders.manager_id IS NULL ";
+    private static final String COUNT_ALL_AWAITING_ANSWER = "SELECT count(*) FROM orders where orders.manager_id IS NULL;";
+    private static final String FIND_ALL_AWAITING_MASTER = "SELECT * FROM orders where orders.master_id IS NULL AND orders.manager_id IS NOT NULL ";
+    private static final String COUNT_ALL_AWAITING_MASTER = "SELECT count(*) FROM orders where orders.master_id IS NULL AND orders.manager_id IS NOT NULL;";
+    private static final String FIND_BY_ID = "SELECT * FROM orders where orders.id = ?";
+    private static final String ORDER_SELECT = "SELECT * FROM orders";
+    private static final String ORDER_CREATE = "INSERT into orders(author_id, author_description) VALUES (?,?);";
+    private static final String ORDER_UPDATE = "UPDATE public.orders SET author_id = ?, author_description = ?, price = ?, master_id = ?, done = ?, manager_id = ?, manager_description = ?, accepted = ? WHERE id = ?;";
+
+    /**
+     * Instantiates a new Order dao.
+     *
+     * @param connectionManager the connection manager
+     */
+    public OrderDaoImpl(ConnectionManager connectionManager) {
+        jdbcTemplate = new JdbcTemplate(connectionManager);
+    }
+
 
     @Override
-    public String getTableName() {
-        return "orders";
+    public List<Order> findAllByAuthor(Long authorId, String orderField, boolean ascending, int limit, int offset) {
+        return jdbcTemplate.queryObjectsPaginated(FIND_ALL_BY_AUTHOR, orderMapper, orderField, ascending, limit, offset, authorId);
     }
 
     @Override
-    public String getSelectQuery() {
-        return Queries.ORDER_SELECT;
+    public Long countByAuthor(Long authorId) {
+        return jdbcTemplate.queryObject(COUNT_ALL_BY_AUTHOR, longMapper, authorId);
     }
 
     @Override
-    public String getCountQuery() {
-        return Queries.ORDER_COUNT;
+    public List<Order> findAllByMaster(Long masterId, String orderField, boolean ascending, int limit, int offset) {
+        return jdbcTemplate.queryObjectsPaginated(FIND_ALL_BY_MASTER, orderMapper, orderField, ascending, limit, offset, masterId);
     }
 
     @Override
-    public String getCreateQuery() {
-        return Queries.ORDER_CREATE;
+    public Long countByMaster(Long masterId) {
+        return jdbcTemplate.queryObject(COUNT_ALL_BY_MASTER, longMapper, masterId);
     }
 
     @Override
-    public String getUpdateQuery() {
-        return Queries.ORDER_UPDATE;
+    public List<Order> findAllByManager(Long managerId, String orderField, boolean ascending, int limit, int offset) {
+        return jdbcTemplate.queryObjectsPaginated(FIND_ALL_BY_MANAGER, orderMapper, orderField, ascending, limit, offset, managerId);
     }
 
     @Override
-    public String getDeleteQuery() {
+    public Long countByManager(Long managerId) {
+        return jdbcTemplate.queryObject(COUNT_ALL_BY_MANAGER, longMapper, managerId);
+
+    }
+
+    @Override
+    public List<Order> findAllAwaitingAnswer(String orderField, boolean ascending, int limit, int offset) {
+        return jdbcTemplate.queryObjectsPaginated(FIND_ALL_AWAITING_ANSWER, orderMapper, orderField, ascending, limit, offset);
+    }
+
+    @Override
+    public Long countAwaitingAnswer() {
+        return jdbcTemplate.queryObject(COUNT_ALL_AWAITING_ANSWER, longMapper);
+    }
+
+    @Override
+    public List<Order> findAllAwaitingMaster(String orderField, boolean ascending, int limit, int offset) {
+        return jdbcTemplate.queryObjectsPaginated(FIND_ALL_AWAITING_MASTER, orderMapper, orderField, ascending, limit, offset);
+    }
+
+    @Override
+    public Long countAwaitingMaster() {
+        return jdbcTemplate.queryObject(COUNT_ALL_AWAITING_MASTER, longMapper);
+    }
+
+    @Override
+    public Long persist(Order order) {
+        Long id = jdbcTemplate.insert(ORDER_CREATE, order.getAuthor().getId(), order.getAuthorDescription());
+        order.setId(id);
+        return id;
+    }
+
+    @Override
+    public Order findByPK(Long key) {
+        return jdbcTemplate.queryObject(FIND_BY_ID, orderMapper, key);
+    }
+
+    @Override
+    public void update(Order order) {
+        Long authorId = Optional.ofNullable(order.getAuthor()).map(User::getId).orElse(null);
+        Long masterId = Optional.ofNullable(order.getMaster()).map(User::getId).orElse(null);
+        Long managerId = Optional.ofNullable(order.getManager()).map(User::getId).orElse(null);
+
+        jdbcTemplate.update(ORDER_UPDATE,
+                authorId,
+                order.getAuthorDescription(),
+                order.getPrice(),
+                masterId,
+                order.isDone(),
+                managerId,
+                order.getManagerDescription(),
+                order.isAccepted(),
+                order.getId());
+    }
+
+    @Override
+    public void delete(Order object) {
         throw new NotImplementedException();
     }
 
     @Override
-    protected List<Order> parseResultSet(ResultSet rs) throws DatabaseException {
-        LinkedList<Order> result = new LinkedList<>();
-        try {
-            while (rs.next()) {
-
-                Order order = parseOrderFromResultSet(rs);
-
-                result.add(order);
-            }
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        }
-        return result;
+    public List<Order> findAll() {
+        return jdbcTemplate.queryObjects(ORDER_SELECT, orderMapper);
     }
-
-
-    @Override
-    protected void prepareStatementForInsert(PreparedStatement ps, Order order) throws DatabaseException {
-        try {
-            ps.setLong(1, order.getAuthor().getId());
-            ps.setString(2, order.getAuthorDescription());
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    @Override
-    protected void prepareStatementForUpdate(PreparedStatement ps, Order order) throws DatabaseException {
-        try {
-            if (order.getAuthor() == null) {
-                ps.setNull(1, Types.INTEGER);
-            } else {
-                ps.setLong(1, order.getAuthor().getId());
-            }
-
-            ps.setString(2, order.getAuthorDescription());
-            ps.setBigDecimal(3, order.getPrice());
-
-            if (order.getMaster() == null) {
-                ps.setNull(4, Types.INTEGER);
-            } else {
-                ps.setLong(4, order.getMaster().getId());
-            }
-
-            ps.setBoolean(5, order.isDone());
-
-            if (order.getManager() == null) {
-                ps.setNull(6, Types.INTEGER);
-            } else {
-                ps.setLong(6, order.getManager().getId());
-            }
-
-            ps.setString(7, order.getManagerDescription());
-            ps.setBoolean(8, order.isAccepted());
-            ps.setLong(9, order.getId());
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
-    }
-
-    /**
-     * Parses order from result set
-     *
-     * @param rs result set to be parsed
-     * @return parsed order
-     * @throws SQLException happens if fields does not exist when trying to obtain it from result set
-     */
-    private Order parseOrderFromResultSet(ResultSet rs) throws SQLException {
-        return new Order(rs.getLong("id"),
-                new User.UserBuilder().id(rs.getLong("author_id")).build(),
-                rs.getString("author_description"),
-                rs.getBigDecimal("price"),
-                new User.UserBuilder().id(rs.getLong("master_id")).build(),
-                new User.UserBuilder().id(rs.getLong("manager_id")).build(),
-                rs.getString("manager_description"),
-                rs.getBoolean("accepted"),
-                rs.getBoolean("done"));
-    }
-
-
-    @Override
-    public List<Order> findAllByAuthor(Long authorId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
-        return findAll("author_id = " + authorId, orderField, ascending, limit, offset);
-    }
-
-    @Override
-    public Long countByAuthor(Long authorId) throws DatabaseException {
-        return count(String.format("author_id = %d", authorId));
-    }
-
-    @Override
-    public List<Order> findAllByMaster(Long masterId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
-        return findAll("master_id = " + masterId, orderField, ascending, limit, offset);
-    }
-
-    @Override
-    public Long countByMaster(Long masterId) throws DatabaseException {
-        return count(String.format("master_id = %d", masterId));
-    }
-
-    @Override
-    public List<Order> findAllByManager(Long managerId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
-        return findAll("manager_id = " + managerId, orderField, ascending, limit, offset);
-    }
-
-    @Override
-    public Long countByManager(Long managerId) throws DatabaseException {
-        return count(String.format("manager_id = %d", managerId));
-    }
-
-    @Override
-    public List<Order> findAllAwaitingAnswer(String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
-        return findAll("manager_id IS NULL", orderField, ascending, limit, offset);
-    }
-
-    @Override
-    public Long countAwaitingAnswer() throws DatabaseException {
-        return count("manager_id IS NULL");
-    }
-
-    @Override
-    public List<Order> findAllAwaitingMaster(String orderField, boolean ascending, int limit, int offset) throws DatabaseException {
-        return findAll("master_id IS NULL AND manager_id IS NOT NULL", orderField, ascending, limit, offset);
-    }
-
-    @Override
-    public Long countAwaitingMaster() throws DatabaseException {
-        return count("master_id IS NULL AND manager_id IS NOT NULL");
-    }
-
 }

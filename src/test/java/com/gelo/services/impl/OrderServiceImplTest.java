@@ -5,9 +5,13 @@ import com.gelo.model.dao.OrderDao;
 import com.gelo.model.dao.UserDao;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.User;
-import com.gelo.model.exception.DatabaseException;
+import com.gelo.persistance.ConnectionManager;
+import com.gelo.persistance.exception.DatabaseRuntimeException;
+import com.gelo.persistance.transaction.TransactionManager;
 import com.gelo.services.OrderService;
+import com.gelo.util.BeanStorage;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -25,11 +29,18 @@ public class OrderServiceImplTest {
     @Mock
     private OrderDao orderDao;
 
+    @BeforeClass
+    public static void setUp() {
+        ConnectionManager connectionManager = new ConnectionManager();
+        BeanStorage.INSTANCE.add(ConnectionManager.class, connectionManager);
+        BeanStorage.INSTANCE.add(TransactionManager.class, new TransactionManager(connectionManager));
+    }
+
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
     @Test
-    public void findAll() throws DatabaseException {
+    public void findAll() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
@@ -42,13 +53,13 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findAll();
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findAll();
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findAll();
 
         Assert.assertNull(orderService.findAll());
     }
 
     @Test
-    public void findAllAwaitingAnswer() throws DatabaseException {
+    public void findAllAwaitingAnswer() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
@@ -61,13 +72,13 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findAllAwaitingAnswer("id", true, 1, 0);
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findAllAwaitingAnswer("id", true, 1, 0);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findAllAwaitingAnswer("id", true, 1, 0);
 
         Assert.assertNull(orderService.findAllAwaitingAnswer("id", true, 1, 0));
     }
 
     @Test
-    public void findAllAwaitingMaster() throws DatabaseException {
+    public void findAllAwaitingMaster() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
@@ -80,13 +91,13 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findAllAwaitingMaster("id", true, 1, 0);
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findAllAwaitingMaster("id", true, 1, 0);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findAllAwaitingMaster("id", true, 1, 0);
 
         Assert.assertNull(orderService.findAllAwaitingMaster("id", true, 1, 0));
     }
 
     @Test
-    public void findAllByAuthorId() throws DatabaseException {
+    public void findAllByAuthorId() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
@@ -99,13 +110,13 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findAllByAuthor(2L, "id", true, 1, 0);
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findAllByAuthor(2L, "id", true, 1, 0);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findAllByAuthor(2L, "id", true, 1, 0);
 
         Assert.assertNull(orderService.findAllByAuthorId(2L, "id", true, 1, 0));
     }
 
     @Test
-    public void findAllByMasterId() throws DatabaseException {
+    public void findAllByMasterId() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
@@ -118,13 +129,13 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findAllByMaster(2L, "id", true, 1, 0);
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findAllByMaster(2L, "id", true, 1, 0);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findAllByMaster(2L, "id", true, 1, 0);
 
         Assert.assertNull(orderService.findAllByMasterId(2L, "id", true, 1, 0));
     }
 
     @Test
-    public void findAllByManagerId() throws DatabaseException {
+    public void findAllByManagerId() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
@@ -137,17 +148,17 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findAllByManager(2L, "id", true, 1, 0);
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findAllByManager(2L, "id", true, 1, 0);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findAllByManager(2L, "id", true, 1, 0);
 
         Assert.assertNull(orderService.findAllByManagerId(2L, "id", true, 1, 0));
     }
 
     @Test
-    public void answerOrder() throws DatabaseException {
+    public void answerOrder() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
-        Mockito.when(userDao.findByPK(23L)).thenReturn(EntityMocks.createTestUser());
+        Mockito.when(userDao.findByPK(2L)).thenReturn(EntityMocks.createTestUser());
 
         Mockito.when(orderDao.findByPK(testOrder.getId())).thenReturn(testOrder);
 
@@ -157,21 +168,21 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findByPK(testOrder.getId());
 
-        Mockito.verify(userDao, Mockito.times(3)).findByPK(23L);
+        Mockito.verify(userDao, Mockito.times(3)).findByPK(2L);
 
         Mockito.verify(userDao).update(Mockito.any(User.class));
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findByPK(testOrder.getId());
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findByPK(testOrder.getId());
 
         Assert.assertFalse(orderService.answerOrder(testOrder));
     }
 
     @Test
-    public void linkMaster() throws DatabaseException {
+    public void linkMaster() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
-        Mockito.when(userDao.findByPK(23L)).thenReturn(EntityMocks.createTestUser());
+        Mockito.when(userDao.findByPK(2L)).thenReturn(EntityMocks.createTestUser());
 
         Mockito.when(orderDao.findByPK(testOrder.getId())).thenReturn(testOrder);
 
@@ -181,17 +192,17 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findByPK(testOrder.getId());
 
-        Mockito.verify(userDao, Mockito.times(3)).findByPK(23L);
+        Mockito.verify(userDao, Mockito.times(3)).findByPK(2L);
 
         Mockito.verify(userDao).update(Mockito.any(User.class));
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findByPK(testOrder.getId());
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findByPK(testOrder.getId());
 
         Assert.assertFalse(orderService.linkMaster(testOrder));
     }
 
     @Test
-    public void saveOrder() throws DatabaseException {
+    public void saveOrder() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
@@ -202,17 +213,17 @@ public class OrderServiceImplTest {
 
         Mockito.verify(userDao).update(Mockito.any(User.class));
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).persist(Mockito.any(Order.class));
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).persist(Mockito.any(Order.class));
 
         Assert.assertFalse(orderService.saveOrder(testOrder));
     }
 
     @Test
-    public void finishOrder() throws DatabaseException {
+    public void finishOrder() throws DatabaseRuntimeException {
         OrderService orderService = new OrderServiceImpl(orderDao, userDao);
 
         Order testOrder = EntityMocks.createTestOrder();
-        Mockito.when(userDao.findByPK(23L)).thenReturn(EntityMocks.createTestUser());
+        Mockito.when(userDao.findByPK(2L)).thenReturn(EntityMocks.createTestUser());
 
         Mockito.when(orderDao.findByPK(testOrder.getId())).thenReturn(testOrder);
 
@@ -222,11 +233,11 @@ public class OrderServiceImplTest {
 
         Mockito.verify(orderDao).findByPK(testOrder.getId());
 
-        Mockito.verify(userDao, Mockito.times(3)).findByPK(23L);
+        Mockito.verify(userDao, Mockito.times(3)).findByPK(2L);
 
         Mockito.verify(userDao, Mockito.times(3)).update(Mockito.any(User.class));
 
-        Mockito.doThrow(new DatabaseException()).when(orderDao).findByPK(testOrder.getId());
+        Mockito.doThrow(new DatabaseRuntimeException()).when(orderDao).findByPK(testOrder.getId());
 
         Assert.assertFalse(orderService.finishOrder(testOrder));
     }

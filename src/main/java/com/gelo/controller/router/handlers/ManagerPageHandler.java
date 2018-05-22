@@ -5,8 +5,8 @@ import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
 import com.gelo.services.OrderService;
 import com.gelo.services.Paginator;
-import com.gelo.services.impl.OrderServiceImpl;
 import com.gelo.services.impl.PaginatorImpl;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.pagination.OrderPaginationForm;
@@ -22,10 +22,10 @@ import java.io.IOException;
  */
 @PreAuthorize(role = RoleType.ROLE_MANAGER)
 public class ManagerPageHandler implements Handler {
+    OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);
 
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        OrderService orderService = new OrderServiceImpl();
         Paginator<Order> orderPaginationService = new PaginatorImpl<>();
         OrderPaginationForm form = new OrderPaginationForm(
                 request.getParameter("page"),
@@ -54,7 +54,7 @@ public class ManagerPageHandler implements Handler {
         request.setAttribute("page", orderPaginationService.getPage());
         request.setAttribute("orders", orderPaginationService.getEntities());
 
-        if (orderPaginationService.isValid()) {
+        if (!orderPaginationService.isValid()) {
             request.setAttribute("alerts", form.getErrorList());
         }
 

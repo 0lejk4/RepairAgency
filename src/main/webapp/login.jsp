@@ -23,7 +23,6 @@
 
 </head>
 <body>
-<%--Todo: localizate--%>
 <div id="login-overlay" class="modal-dialog modal-lg" style="z-index: 9999;">
     <div class="modal-content">
         <div class="modal-header">

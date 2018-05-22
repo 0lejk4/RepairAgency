@@ -1,11 +1,10 @@
 package com.gelo.controller.router.handlers;
 
-import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.User;
 import com.gelo.services.OrderService;
-import com.gelo.services.impl.OrderServiceImpl;
 import com.gelo.services.impl.PaginatorImpl;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.pagination.OrderPaginationForm;
@@ -19,11 +18,10 @@ import java.io.IOException;
  * Shows client`s history page with all
  * orders user has at the moment and had in past
  */
-@GetMapping
 public class ClientHistoryPageHandler implements Handler {
+    OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        OrderService orderService = new OrderServiceImpl();
         PaginatorImpl<Order> orderPaginationService = new PaginatorImpl<>();
         User loggedUser = (User) request.getSession(true).getAttribute("user");
         OrderPaginationForm form = new OrderPaginationForm(
@@ -54,7 +52,7 @@ public class ClientHistoryPageHandler implements Handler {
         request.setAttribute("page", orderPaginationService.getPage());
         request.setAttribute("orders", orderPaginationService.getEntities());
 
-        if (orderPaginationService.isValid()) {
+        if (!orderPaginationService.isValid()) {
             request.setAttribute("alerts", form.getErrorList());
         }
 

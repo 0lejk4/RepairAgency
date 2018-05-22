@@ -1,31 +1,26 @@
 package com.gelo.services.impl;
 
-import com.gelo.factory.DaoFactory;
 import com.gelo.model.dao.ReviewDao;
 import com.gelo.model.dao.UserDao;
 import com.gelo.model.domain.Review;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.services.DataSource;
+import com.gelo.persistance.exception.DatabaseRuntimeException;
+import com.gelo.persistance.exception.TransactionRuntimeException;
+import com.gelo.persistance.transaction.TransactionManager;
 import com.gelo.services.ReviewService;
-import org.apache.commons.dbutils.DbUtils;
+import com.gelo.util.BeanStorage;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
  * The type Review service.
  */
 public class ReviewServiceImpl implements ReviewService {
+    private static final Logger logger = LogManager.getLogger(ReviewServiceImpl.class);
     private UserDao userDao;
     private ReviewDao reviewDao;
-
-    /**
-     * Instantiates a new Review service.
-     */
-    public ReviewServiceImpl() {
-        this(DaoFactory.getUserDaoInstance(), DaoFactory.getReviewDaoInstance());
-    }
+    private TransactionManager transactionManager = BeanStorage.INSTANCE.get(TransactionManager.class);
 
     /**
      * Instantiates a new Review service.
@@ -40,10 +35,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     /**
      * Fetches author of review
+     *
      * @param review - review that needs author to be fetched
-     * @throws DatabaseException that can occur when working with dao
      */
-    private void populateAuthorField(Review review) throws DatabaseException {
+    private void populateAuthorField(Review review) {
         review.setAuthor(
                 userDao.findByPK(review.getAuthor().getId())
         );
@@ -51,103 +46,68 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public boolean save(Review review) {
-        Connection connection = null;
-        boolean status = true;
         try {
-            connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            reviewDao.setConnection(connection);
             reviewDao.persist(review);
-            connection.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(connection);
-            status = false;
-        } finally {
-            DataSource.closeConnection(connection);
+        } catch (DatabaseRuntimeException e) {
+            logger.error(e);
+            return false;
         }
-
-        return status;
+        return true;
     }
 
     @Override
     public Review findById(Long id) {
-        Connection connection = null;
-        Review review = null;
+        Object[] result = new Object[1];
         try {
-            connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            reviewDao.setConnection(connection);
-            userDao.setConnection(connection);
-            review = reviewDao.findByPK(id);
-            populateAuthorField(review);
-            connection.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(connection);
-        } finally {
-            DataSource.closeConnection(connection);
+            transactionManager.tx(() -> {
+                Review review = reviewDao.findByPK(id);
+                populateAuthorField(review);
+                result[0] = review;
+            });
+        } catch (DatabaseRuntimeException | TransactionRuntimeException e) {
+            logger.error(e);
+            return null;
         }
-
-        return review;
+        return (Review) result[0];
     }
 
     @Override
     public List<Review> getAllByMasterIdPaginated(Long masterId, String orderField, boolean ascending, int limit, int offset) {
-        Connection connection = null;
-        List<Review> reviews;
+        Object[] result = new Object[1];
         try {
-            connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            reviewDao.setConnection(connection);
-            userDao.setConnection(connection);
-            reviews = reviewDao.findAllByMasterIdPaginated(masterId, orderField, ascending, limit, offset);
-            for (Review r : reviews) {
-                populateAuthorField(r);
-            }
-            connection.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(connection);
-            reviews = null;
-        } finally {
-            DataSource.closeConnection(connection);
+            transactionManager.tx(() -> {
+                List<Review> reviews = reviewDao.findAllByMasterIdPaginated(masterId, orderField, ascending, limit, offset);
+                for (Review r : reviews) {
+                    populateAuthorField(r);
+                }
+                result[0] = reviews;
+            });
+        } catch (DatabaseRuntimeException | TransactionRuntimeException e) {
+            logger.error(e);
+            return null;
         }
 
-        return reviews;
+        return (List<Review>) result[0];
     }
 
     @Override
     public Long countAllByMasterId(Long masterId) {
-        Connection connection = null;
-        Long count = 0L;
         try {
-            connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            reviewDao.setConnection(connection);
-            count = reviewDao.countAllByMasterId(masterId);
-            connection.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(connection);
-        } finally {
-            DataSource.closeConnection(connection);
+            return reviewDao.countAllByMasterId(masterId);
+        } catch (DatabaseRuntimeException | TransactionRuntimeException e) {
+            logger.error(e);
+            return 0L;
         }
-        return count;
     }
 
 
     @Override
     public boolean canAuthorReviewMaster(Long authorId, Long masterId) {
-        Connection connection = null;
-        boolean can_review = false;
         try {
-            connection = DataSource.getInstance().getConnection();
-            connection.setAutoCommit(false);
-            reviewDao.setConnection(connection);
-            can_review = reviewDao.canAuthorReviewMaster(authorId, masterId);
-            connection.commit();
-        } catch (SQLException | DatabaseException e) {
-            DbUtils.rollbackAndCloseQuietly(connection);
-        } finally {
-            DataSource.closeConnection(connection);
+            return reviewDao.canAuthorReviewMaster(authorId, masterId);
+        } catch (DatabaseRuntimeException | TransactionRuntimeException e) {
+            logger.error(e);
+            return false;
         }
-        return can_review;
     }
 }

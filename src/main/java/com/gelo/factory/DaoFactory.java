@@ -8,21 +8,27 @@ import com.gelo.model.dao.impl.OrderDaoImpl;
 import com.gelo.model.dao.impl.PermissionDaoImpl;
 import com.gelo.model.dao.impl.ReviewDaoImpl;
 import com.gelo.model.dao.impl.UserDaoImpl;
+import com.gelo.persistance.ConnectionManager;
 
 /**
  * Layer of abstraction to make Dependency Injection easier.
  * Is mainly used in default constructors of service layers.
  */
 public class DaoFactory {
-    //Todo: Make this object pool or leave as it is if branch JdbcTemplate will be successful
+
+    private ConnectionManager connectionManager;
+
+    public DaoFactory(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
 
     /**
      * Gets user dao instance.
      *
      * @return the user dao instance
      */
-    public static UserDao getUserDaoInstance() {
-        return new UserDaoImpl();
+    public UserDao getUserDaoInstance() {
+        return new UserDaoImpl(connectionManager);
     }
 
     /**
@@ -30,8 +36,8 @@ public class DaoFactory {
      *
      * @return the role dao instance
      */
-    public static PermissionDao getPermissionDaoInstance() {
-        return new PermissionDaoImpl();
+    public PermissionDao getPermissionDaoInstance() {
+        return new PermissionDaoImpl(connectionManager);
     }
 
     /**
@@ -39,8 +45,8 @@ public class DaoFactory {
      *
      * @return the order dao instance
      */
-    public static OrderDao getOrderDaoInstance() {
-        return new OrderDaoImpl();
+    public OrderDao getOrderDaoInstance() {
+        return new OrderDaoImpl(connectionManager);
     }
 
     /**
@@ -48,8 +54,8 @@ public class DaoFactory {
      *
      * @return the review dao instance
      */
-    public static ReviewDao getReviewDaoInstance() {
-        return new ReviewDaoImpl();
+    public ReviewDao getReviewDaoInstance() {
+        return new ReviewDaoImpl(connectionManager);
     }
 
 

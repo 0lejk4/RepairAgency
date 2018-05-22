@@ -6,7 +6,6 @@
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
 
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="${sessionScope['language']}">
 <head>
@@ -74,6 +73,23 @@
         <c:if test="${sessionScope.get('user') == null}">
             <div class="row my-4">
                 <div class="col">
+                    <div class="row m-3">
+                        <form class="mx-auto text-center" action="<c:url value="/app/language"/>" method="post">
+                            <div class="form-group">
+                                <label for="language" class="display-4"><fmt:message key="field.language"/> </label>
+                                <select onchange="submit()" id="language" class="form-control" name="language">
+                                    <option value="en" ${sessionScope.language == 'en' ? 'selected' : ''}>
+                                        <span class="flag-icon flag-icon-us"></span> <fmt:message
+                                            key="header.language.english"/>
+                                    </option>
+                                    <option value="uk" ${sessionScope.language == 'uk' ? 'selected' : ''}>
+                                        <span class="flag-icon flag-icon-ua"></span> <fmt:message
+                                            key="header.language.ukrainian"/>
+                                    </option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
                     <div class="row">
                         <blockquote class="col-6 blockquote mx-auto text-center">
                             <p class="mb-0">

@@ -4,9 +4,13 @@ import com.gelo.mock.entity.EntityMocks;
 import com.gelo.model.dao.PermissionDao;
 import com.gelo.model.dao.UserDao;
 import com.gelo.model.domain.User;
-import com.gelo.model.exception.DatabaseException;
+import com.gelo.persistance.ConnectionManager;
+import com.gelo.persistance.exception.DatabaseRuntimeException;
+import com.gelo.persistance.transaction.TransactionManager;
 import com.gelo.services.UserService;
+import com.gelo.util.BeanStorage;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -25,8 +29,15 @@ public class UserServiceImplTest {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
+    @BeforeClass
+    public static void setUp() {
+        ConnectionManager connectionManager = new ConnectionManager();
+        BeanStorage.INSTANCE.add(ConnectionManager.class, connectionManager);
+        BeanStorage.INSTANCE.add(TransactionManager.class, new TransactionManager(connectionManager));
+    }
+
     @Test
-    public void findAll() throws DatabaseException {
+    public void findAll() throws DatabaseRuntimeException {
         UserService userService = new UserServiceImpl(userDao, permissionDao);
         User user = EntityMocks.createTestUser();
 
@@ -36,13 +47,13 @@ public class UserServiceImplTest {
 
         Mockito.verify(userDao).findAll();
 
-        Mockito.doThrow(new DatabaseException()).when(userDao).findAll();
+        Mockito.doThrow(new DatabaseRuntimeException()).when(userDao).findAll();
 
         Assert.assertNull(userService.findAll());
     }
 
     @Test
-    public void findFiveBestMasters() throws DatabaseException {
+    public void findFiveBestMasters() throws DatabaseRuntimeException {
         UserService userService = new UserServiceImpl(userDao, permissionDao);
         User user = EntityMocks.createTestUser();
 
@@ -52,13 +63,13 @@ public class UserServiceImplTest {
 
         Mockito.verify(userDao).findFiveBestMasters();
 
-        Mockito.doThrow(new DatabaseException()).when(userDao).findFiveBestMasters();
+        Mockito.doThrow(new DatabaseRuntimeException()).when(userDao).findFiveBestMasters();
 
         Assert.assertNull(userService.findFiveBestMasters());
     }
 
     @Test
-    public void save() throws DatabaseException {
+    public void save() throws DatabaseRuntimeException {
         UserService userService = new UserServiceImpl(userDao, permissionDao);
         User user = EntityMocks.createTestUser();
 
@@ -66,13 +77,13 @@ public class UserServiceImplTest {
 
         Mockito.verify(userDao).persist(user);
 
-        Mockito.doThrow(new DatabaseException()).when(userDao).persist(user);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(userDao).persist(user);
 
         Assert.assertFalse(userService.save(user));
     }
 
     @Test
-    public void findByEmail() throws DatabaseException{
+    public void findByEmail() throws DatabaseRuntimeException{
         UserService userService = new UserServiceImpl(userDao, permissionDao);
         Mockito.when(permissionDao.getPermissionsByRoleId(0L))
                 .thenReturn(EntityMocks.createUserPermissions());
@@ -80,7 +91,7 @@ public class UserServiceImplTest {
 
         User actual = userService.findByEmail("test@test.com");
 
-        Assert.assertEquals(23L, actual.getId().longValue());
+        Assert.assertEquals(2L, actual.getId().longValue());
         Assert.assertEquals("Ukraine", actual.getCountry());
         Assert.assertEquals("asda213dasd", actual.getPassword());
         Assert.assertEquals("test@test.com", actual.getEmail());
@@ -90,7 +101,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void emailTaken() throws DatabaseException {
+    public void emailTaken() throws DatabaseRuntimeException {
         UserService userService = new UserServiceImpl(userDao, permissionDao);
 
         String mockEmail = "test@test.ua";
@@ -100,13 +111,13 @@ public class UserServiceImplTest {
 
         Mockito.verify(userDao).emailTaken(mockEmail);
 
-        Mockito.doThrow(new DatabaseException()).when(userDao).emailTaken(mockEmail);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(userDao).emailTaken(mockEmail);
 
         Assert.assertTrue(userService.emailTaken(mockEmail));
     }
 
     @Test
-    public void findById() throws DatabaseException {
+    public void findById() throws DatabaseRuntimeException {
         UserService userService = new UserServiceImpl(userDao, permissionDao);
         User user = EntityMocks.createTestUser();
 
@@ -116,7 +127,7 @@ public class UserServiceImplTest {
 
         Mockito.verify(userDao).findByPK(23L);
 
-        Mockito.doThrow(new DatabaseException()).when(userDao).findByPK(23L);
+        Mockito.doThrow(new DatabaseRuntimeException()).when(userDao).findByPK(23L);
 
         Assert.assertNull(userService.findById(23L));
     }

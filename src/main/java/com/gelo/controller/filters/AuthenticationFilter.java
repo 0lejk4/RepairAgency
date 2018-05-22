@@ -23,7 +23,7 @@ public class AuthenticationFilter implements Filter {
     private Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
     public void init(FilterConfig fConfig) throws ServletException {
-        logger.info("Authentication Filter Initialized");
+        logger.debug("Authentication Filter Initialized");
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

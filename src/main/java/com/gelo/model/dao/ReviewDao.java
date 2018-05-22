@@ -1,30 +1,29 @@
 package com.gelo.model.dao;
 
 import com.gelo.model.domain.Review;
-import com.gelo.model.exception.DatabaseException;
 
 import java.util.List;
 
 /**
  * The interface Review dao.
  */
-public interface ReviewDao extends Connectible {
+public interface ReviewDao {
     /**
      * Persist new review.
      *
      * @param review the review
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    void persist(Review review) throws DatabaseException;
+    Long persist(Review review) ;
 
     /**
      * Find review by pk.
      *
      * @param id the id
      * @return the review
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Review findByPK(Long id) throws DatabaseException;
+    Review findByPK(Long id) ;
 
     /**
      * Find all review`s by master`s id paginated.
@@ -35,9 +34,9 @@ public interface ReviewDao extends Connectible {
      * @param limit      the limit
      * @param offset     the offset
      * @return the list
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    List<Review> findAllByMasterIdPaginated(Long masterId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException;
+    List<Review> findAllByMasterIdPaginated(Long masterId, String orderField, boolean ascending, int limit, int offset) ;
 
 
     /**
@@ -45,9 +44,9 @@ public interface ReviewDao extends Connectible {
      *
      * @param masterId the master id
      * @return the Long
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Long countAllByMasterId(Long masterId) throws DatabaseException;
+    Long countAllByMasterId(Long masterId) ;
 
     /**
      * Can author review master.
@@ -55,7 +54,7 @@ public interface ReviewDao extends Connectible {
      * @param authorId the author id
      * @param masterId the master id
      * @return the boolean
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    boolean canAuthorReviewMaster(Long authorId, Long masterId) throws DatabaseException;
+    boolean canAuthorReviewMaster(Long authorId, Long masterId) ;
 }

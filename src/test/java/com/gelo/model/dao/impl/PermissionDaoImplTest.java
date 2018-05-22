@@ -4,47 +4,54 @@ import com.gelo.factory.DaoFactory;
 import com.gelo.mock.entity.EntityMocks;
 import com.gelo.model.dao.PermissionDao;
 import com.gelo.model.domain.Permission;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.services.DataSource;
+import com.gelo.persistance.ConnectionManager;
+import com.gelo.persistance.exception.DatabaseRuntimeException;
+import com.gelo.persistance.util.ScriptRunner;
+import com.gelo.util.ResourcesUtil;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
 public class PermissionDaoImplTest {
+    private DaoFactory daoFactory;
+
+    @Before
+    public void setUp() throws Exception {
+        ConnectionManager connectionManager = new ConnectionManager();
+        daoFactory = new DaoFactory(connectionManager);
+        ScriptRunner scriptRunner = new ScriptRunner(connectionManager);
+        scriptRunner.executeScript(ResourcesUtil.getResourceFile("SetupDB.sql"));
+    }
 
     @Test
-    public void getPermissionsByRoleId() throws SQLException, DatabaseException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
+    public void getPermissionsByRoleId() throws SQLException, DatabaseRuntimeException {
 
-        PermissionDao permissionDao = DaoFactory.getPermissionDaoInstance();
-        permissionDao.setConnection(connection);
+        PermissionDao permissionDao = daoFactory.getPermissionDaoInstance();
 
         Set<Permission> permissionsByRoleId = permissionDao.getPermissionsByRoleId(1L);
 
         Set<Permission> expectedPermissionsByRoleId = EntityMocks.createUserPermissions();
 
-        Assert.assertTrue("Test user permissions",permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
+        Assert.assertTrue("Test user permissions", permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
 
         permissionsByRoleId = permissionDao.getPermissionsByRoleId(2L);
 
         expectedPermissionsByRoleId = EntityMocks.createManagerPermissions();
 
-        Assert.assertTrue("Test manager permissions",permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
+        Assert.assertTrue("Test manager permissions", permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
 
         permissionsByRoleId = permissionDao.getPermissionsByRoleId(3L);
 
         expectedPermissionsByRoleId = EntityMocks.createMasterPermissions();
 
-        Assert.assertTrue("Test master permissions",permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
+        Assert.assertTrue("Test master permissions", permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
 
         permissionsByRoleId = permissionDao.getPermissionsByRoleId(4L);
         expectedPermissionsByRoleId = EntityMocks.createAdminPermissions();
 
-        Assert.assertTrue("Test admin permissions",permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
-        DataSource.closeConnection(permissionDao.getConnection());
+        Assert.assertTrue("Test admin permissions", permissionsByRoleId.containsAll(expectedPermissionsByRoleId));
     }
 }

@@ -4,7 +4,6 @@ package com.gelo.util.tags;
 import com.gelo.model.domain.PermissionType;
 import com.gelo.model.domain.User;
 import com.gelo.util.SecurityUtils;
-import com.gelo.model.domain.User;
 import org.apache.log4j.Logger;
 
 import javax.servlet.jsp.JspWriter;

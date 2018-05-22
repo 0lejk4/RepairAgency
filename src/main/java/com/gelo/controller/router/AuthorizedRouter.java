@@ -5,6 +5,7 @@ import com.gelo.controller.router.annotation.PostMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.controller.router.handlers.Handler;
 import com.gelo.model.domain.PermissionType;
+import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.util.SecurityUtils;
 import com.gelo.util.Transport;
@@ -30,27 +31,6 @@ import static com.gelo.controller.router.annotation.PostMapping.POST_STR;
  * On instantiation router reads all handlers from a file given in method call.
  */
 public class AuthorizedRouter implements Router {
-    private static volatile AuthorizedRouter instance;
-
-
-    /**
-     * Return singleton instance of router
-     *
-     * @param routingFileName file with handler mapping
-     * @return Router instance
-     */
-    public static AuthorizedRouter getInstance(String routingFileName) {
-        AuthorizedRouter localInstance = instance;
-        if (localInstance == null) {
-            synchronized (AuthorizedRouter.class) {
-                localInstance = instance;
-                if (localInstance == null) {
-                    instance = localInstance = new AuthorizedRouter(routingFileName);
-                }
-            }
-        }
-        return localInstance;
-    }
 
     private static final Logger logger = Logger.getLogger(AuthorizedRouter.class);
 
@@ -75,7 +55,7 @@ public class AuthorizedRouter implements Router {
      *
      * @param routesFile file with handler mapping
      */
-    private AuthorizedRouter(String routesFile) {
+    public AuthorizedRouter(String routesFile) {
         Properties properties = new Properties();
         try {
             properties.load(AuthorizedRouter.class.getClassLoader()
@@ -127,11 +107,13 @@ public class AuthorizedRouter implements Router {
             return true;
         }
 
-        if (get != null && GET_STR.equals(request.getMethod())) {
+        String requestMethod = request.getMethod();
+
+        if (get != null && GET_STR.equals(requestMethod)) {
             return true;
         }
 
-        if (post != null && POST_STR.equals(request.getMethod())) {
+        if (post != null && POST_STR.equals(requestMethod)) {
             return true;
         }
 
@@ -161,23 +143,22 @@ public class AuthorizedRouter implements Router {
             return false;
         }
 
-        //Check if user has Role
-        if (SecurityUtils.hasRole(user, preAuthorize.role())) {
-            return true;
-        }
+        if (preAuthorize.role().equals(RoleType.NONE)) {
+            boolean hasAllPermissions = true;
 
-        boolean hasAllPermissions = true;
-
-        //Check if user has Permission
-        for (PermissionType pT : preAuthorize.permissions()) {
-            if (!SecurityUtils.hasPermission(user, pT)) {
-                hasAllPermissions = false;
-                break;
+            //Check if user has Permission
+            for (PermissionType pT : preAuthorize.permissions()) {
+                if (!SecurityUtils.hasPermission(user, pT)) {
+                    hasAllPermissions = false;
+                    break;
+                }
             }
+
+            return hasAllPermissions;
+        } else {
+            return SecurityUtils.hasRole(user, preAuthorize.role());
         }
 
-
-        return hasAllPermissions;
     }
 
     /**

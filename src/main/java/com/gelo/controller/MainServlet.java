@@ -26,13 +26,13 @@ public class MainServlet extends HttpServlet {
     /**
      * Delegates router to pass processing to handlers.
      * Then uses returned Transport from it and decides what to do next.
-     * @param req servlet request
+     *
+     * @param req  servlet request
      * @param resp servlet response
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Transport transport = router.handle(req, resp);
-
         switch (transport.getType()) {
             case REDIRECT:
                 resp.sendRedirect(transport.getUrl());
@@ -47,11 +47,11 @@ public class MainServlet extends HttpServlet {
     }
 
     /**
-     * On init creates router instance from given filename
+     * On init gets router instance from servlet context
      */
     @Override
     public void init() {
         logger.info("Main controller started");
-        router = AuthorizedRouter.getInstance("routes.properties");
+        router = (AuthorizedRouter) getServletContext().getAttribute("router");
     }
 }

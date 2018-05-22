@@ -1,12 +1,11 @@
 package com.gelo.controller.router.handlers;
 
-import com.gelo.controller.router.annotation.GetMapping;
-import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Review;
 import com.gelo.model.domain.User;
 import com.gelo.services.ReviewService;
 import com.gelo.services.UserService;
 import com.gelo.services.impl.PaginatorImpl;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
 import com.gelo.validation.pagination.ReviewPaginationForm;
 
@@ -18,13 +17,13 @@ import java.io.IOException;
 /**
  * Shows some users profile with all reviews it has.
  */
-@GetMapping
 public class ProfileHandler implements Handler {
+    UserService userService = BeanStorage.INSTANCE.get(UserService.class);
+    private ReviewService reviewService = BeanStorage.INSTANCE.get(ReviewService.class);
+
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String profile_id_param = request.getParameter("profile_id");
-        UserService userService = ServiceFactory.getUserServiceInstance();
-        ReviewService reviewService = ServiceFactory.getReviewServiceInstance();
         PaginatorImpl<Review> orderPaginationService = new PaginatorImpl<>();
         User loggedUser = (User) request.getSession(false).getAttribute("user");
         boolean isOwn = (profile_id_param == null);

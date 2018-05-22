@@ -2,7 +2,6 @@ package com.gelo.model.dao;
 
 import com.gelo.model.dao.generic.GenericDao;
 import com.gelo.model.domain.Order;
-import com.gelo.model.exception.DatabaseException;
 
 import java.util.List;
 
@@ -16,9 +15,9 @@ public interface OrderDao extends GenericDao<Order, Long> {
      * Find all orders.
      *
      * @return the list
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    List<Order> findAll() throws DatabaseException;
+    List<Order> findAll() ;
 
     /**
      * Find all orders by author using id.
@@ -29,9 +28,9 @@ public interface OrderDao extends GenericDao<Order, Long> {
      * @param limit      the limit
      * @param offset     the offset
      * @return the list
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    List<Order> findAllByAuthor(Long authorId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException;
+    List<Order> findAllByAuthor(Long authorId, String orderField, boolean ascending, int limit, int offset) ;
 
 
     /**
@@ -39,9 +38,9 @@ public interface OrderDao extends GenericDao<Order, Long> {
      *
      * @param authorId the author id
      * @return the long
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Long countByAuthor(Long authorId) throws DatabaseException;
+    Long countByAuthor(Long authorId) ;
 
     /**
      * Find all orders by master using id.
@@ -52,9 +51,9 @@ public interface OrderDao extends GenericDao<Order, Long> {
      * @param limit      the limit
      * @param offset     the offset
      * @return the list
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    List<Order> findAllByMaster(Long masterId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException;
+    List<Order> findAllByMaster(Long masterId, String orderField, boolean ascending, int limit, int offset) ;
 
 
     /**
@@ -62,9 +61,9 @@ public interface OrderDao extends GenericDao<Order, Long> {
      *
      * @param masterId the master id
      * @return the long
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Long countByMaster(Long masterId) throws DatabaseException;
+    Long countByMaster(Long masterId) ;
 
     /**
      * Find all orders by manager using id.
@@ -75,18 +74,18 @@ public interface OrderDao extends GenericDao<Order, Long> {
      * @param limit      the limit
      * @param offset     the offset
      * @return the list
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    List<Order> findAllByManager(Long managerId, String orderField, boolean ascending, int limit, int offset) throws DatabaseException;
+    List<Order> findAllByManager(Long managerId, String orderField, boolean ascending, int limit, int offset) ;
 
     /**
      * Count by manager long.
      *
      * @param managerId the manager id
      * @return the long
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Long countByManager(Long managerId) throws DatabaseException;
+    Long countByManager(Long managerId) ;
 
     /**
      * Find all awaiting answer orders.
@@ -96,18 +95,18 @@ public interface OrderDao extends GenericDao<Order, Long> {
      * @param limit      the limit
      * @param offset     the offset
      * @return the list
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    List<Order> findAllAwaitingAnswer(String orderField, boolean ascending, int limit, int offset) throws DatabaseException;
+    List<Order> findAllAwaitingAnswer(String orderField, boolean ascending, int limit, int offset) ;
 
 
     /**
      * Count awaiting answer long.
      *
      * @return the long
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Long countAwaitingAnswer() throws DatabaseException;
+    Long countAwaitingAnswer() ;
 
     /**
      * Find all awaiting master orders.
@@ -117,43 +116,43 @@ public interface OrderDao extends GenericDao<Order, Long> {
      * @param limit      the limit
      * @param offset     the offset
      * @return the list
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    List<Order> findAllAwaitingMaster(String orderField, boolean ascending, int limit, int offset) throws DatabaseException;
+    List<Order> findAllAwaitingMaster(String orderField, boolean ascending, int limit, int offset) ;
 
     /**
      * Count awaiting master long.
      *
      * @return the long
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Long countAwaitingMaster() throws DatabaseException;
+    Long countAwaitingMaster() ;
 
     /**
      * Find order by pk.
      *
      * @param orderId the order id
      * @return the order
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    Order findByPK(Long orderId) throws DatabaseException;
+    Order findByPK(Long orderId) ;
 
 
     /**
      * Update order.
      *
      * @param order the order
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    void update(Order order) throws DatabaseException;
+    void update(Order order) ;
 
 
     /**
      * Persist new order.
      *
      * @param order the order
-     * @throws DatabaseException the database exception
+     * @ the database exception
      */
-    void persist(Order order) throws DatabaseException;
+    Long persist(Order order) ;
 
 }

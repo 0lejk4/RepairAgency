@@ -2,11 +2,11 @@ package com.gelo.controller.router.handlers;
 
 import com.gelo.controller.router.annotation.PostMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
-import com.gelo.factory.ServiceFactory;
 import com.gelo.model.domain.Review;
 import com.gelo.model.domain.RoleType;
 import com.gelo.model.domain.User;
 import com.gelo.services.ReviewService;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
 import com.gelo.validation.Alert;
@@ -28,9 +28,9 @@ import java.io.IOException;
 @PostMapping
 @PreAuthorize(role = RoleType.ROLE_USER)
 public class AddReviewHandler implements Handler {
+    private ReviewService reviewService = BeanStorage.INSTANCE.get(ReviewService.class);
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        ReviewService reviewService = ServiceFactory.getReviewServiceInstance();
         User user = (User) request.getSession(false).getAttribute("user");
         LongFormat format = new LongFormat(request.getParameter("masterId"));
 

@@ -1,8 +1,8 @@
 package com.gelo.controller.router.handlers;
 
 import com.gelo.controller.router.annotation.PostMapping;
-import com.gelo.factory.ServiceFactory;
 import com.gelo.services.UserService;
+import com.gelo.util.BeanStorage;
 import com.gelo.util.PasswordUtils;
 import com.gelo.util.Transport;
 import com.gelo.util.constants.Paths;
@@ -26,7 +26,7 @@ import static com.gelo.validation.Alert.single;
 @PostMapping
 public class RegisterHandler implements Handler {
     private static Logger logger = Logger.getLogger(RegisterHandler.class);
-
+    UserService userService = BeanStorage.INSTANCE.get(UserService.class);
     @Override
     public Transport execute(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Transport page;
@@ -36,7 +36,6 @@ public class RegisterHandler implements Handler {
                 request.getParameter("password"));
 
         if (form.valid()) {
-            UserService userService = ServiceFactory.getUserServiceInstance();
             boolean status;
 
             if (userService.emailTaken(form.getEmail())) {

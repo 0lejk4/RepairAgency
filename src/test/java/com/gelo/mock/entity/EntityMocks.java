@@ -72,7 +72,7 @@ public class EntityMocks {
 
     public static User createTestUser() {
         return new User.UserBuilder()
-                .id(23L)
+                .id(2L)
                 .name("Oleg")
                 .email("test@test.com")
                 .country("Ukraine")
@@ -83,5 +83,30 @@ public class EntityMocks {
                 .build();
     }
 
+    public static User createTestMaster() {
+        return new User.UserBuilder()
+                .id(7L)
+                .name("Anton muronuk")
+                .email("test@test.com")
+                .country("Ukraine")
+                .activeOrdersCount(0)
+                .summaryOrdersCount(6)
+                .password("asda213dasd")
+                .role(new Role(3L, RoleType.ROLE_MASTER, createManagerPermissions()))
+                .build();
+    }
+
+    public static User createTestManager() {
+        return new User.UserBuilder()
+                .id(23L)
+                .name("Sergiy Such")
+                .email("such_sergiy@ukr.net")
+                .country("Ukraine")
+                .activeOrdersCount(0)
+                .summaryOrdersCount(6)
+                .password("asda213dasd")
+                .role(new Role(2L, RoleType.ROLE_MANAGER, createMasterPermissions()))
+                .build();
+    }
 
 }

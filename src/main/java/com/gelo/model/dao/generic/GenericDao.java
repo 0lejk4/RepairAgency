@@ -1,8 +1,5 @@
 package com.gelo.model.dao.generic;
 
-import com.gelo.model.dao.Connectible;
-import com.gelo.model.exception.DatabaseException;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -12,30 +9,30 @@ import java.util.List;
  * @param <T>  type of persistent unit
  * @param <PK> primary key type
  */
-public interface GenericDao<T extends Identified<PK>, PK extends Serializable> extends Connectible {
+public interface GenericDao<T extends Identified<PK>, PK extends Serializable> {
 
     /**
      * Creates new record for the given object
      */
-    void persist(T object) throws DatabaseException;
+    Long persist(T object) ;
 
     /**
      * Return entity with corresponding Primary Key or null
      */
-    T findByPK(PK key) throws DatabaseException;
+    T findByPK(PK key) ;
 
     /**
      * Updates object in db
      */
-    void update(T object) throws DatabaseException;
+    void update(T object) ;
 
     /**
      * Deletes object from db
      */
-    void delete(T object) throws DatabaseException;
+    void delete(T object) ;
 
     /**
      * Return list of all records in db
      */
-    List<T> findAll() throws DatabaseException;
+    List<T> findAll() ;
 }

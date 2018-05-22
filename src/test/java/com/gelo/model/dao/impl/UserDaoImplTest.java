@@ -1,68 +1,59 @@
 package com.gelo.model.dao.impl;
 
+import com.gelo.factory.DaoFactory;
 import com.gelo.mock.entity.EntityMocks;
 import com.gelo.model.dao.UserDao;
-import com.gelo.model.exception.DatabaseException;
-import com.gelo.factory.DaoFactory;
 import com.gelo.model.domain.User;
-import com.gelo.services.DataSource;
-import org.apache.commons.dbutils.DbUtils;
+import com.gelo.persistance.ConnectionManager;
+import com.gelo.persistance.exception.DatabaseRuntimeException;
+import com.gelo.persistance.util.ScriptRunner;
+import com.gelo.util.ResourcesUtil;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
 public class UserDaoImplTest {
+    private DaoFactory daoFactory;
+
+    @Before
+    public void setUp() throws Exception {
+        ConnectionManager connectionManager = new ConnectionManager();
+        daoFactory = new DaoFactory(connectionManager);
+        ScriptRunner scriptRunner = new ScriptRunner(connectionManager);
+        scriptRunner.executeScript(ResourcesUtil.getResourceFile("SetupDB.sql"));
+    }
 
     @Test
-    public void findByEmail() throws DatabaseException, SQLException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
-
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+    public void findByEmail() throws DatabaseRuntimeException, SQLException {
+        UserDao userDao = daoFactory.getUserDaoInstance();
         User user = userDao.findByEmail("odubinskiy@ukr.net");
         Assert.assertEquals("Олег Дубинський", user.getName());
 
-        DbUtils.rollbackAndCloseQuietly(connection);
     }
 
-    @Test(expected = DatabaseException.class)
-    public void save_user_fails() throws DatabaseException, SQLException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
-
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+    @Test(expected = DatabaseRuntimeException.class)
+    public void save_user_fails() throws DatabaseRuntimeException, SQLException {
+        UserDao userDao = daoFactory.getUserDaoInstance();
         userDao.persist(new User.UserBuilder().id(1L).build());
-
-        DbUtils.rollbackAndCloseQuietly(connection);
     }
 
-    @Test(expected = DatabaseException.class)
-    public void save_user_violates_email() throws SQLException, DatabaseException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
-
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+    @Test(expected = DatabaseRuntimeException.class)
+    public void save_user_violates_email() throws SQLException, DatabaseRuntimeException {
+        UserDao userDao = daoFactory.getUserDaoInstance();
         User test = EntityMocks.createTestUser2();
         test.setEmail("denis_parkhomenko@ukr.net");
         userDao.persist(test);
-
-        DbUtils.rollbackAndCloseQuietly(connection);
     }
 
     @Test
-    public void save_user_success() throws SQLException, DatabaseException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
+    public void save_user_success() throws SQLException, DatabaseRuntimeException {
 
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+        UserDao userDao = daoFactory.getUserDaoInstance();
+
         User test = EntityMocks.createTestUser2();
 
         userDao.persist(test);
@@ -73,30 +64,21 @@ public class UserDaoImplTest {
                 test.getName(), persisted.getName());
         Assert.assertEquals("User Country same", test.getCountry(), persisted.getCountry());
 
-        DbUtils.rollbackAndCloseQuietly(userDao.getConnection());
+
     }
 
     @Test
-    public void email_taken() throws DatabaseException, SQLException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
-
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+    public void email_taken() throws DatabaseRuntimeException, SQLException {
+        UserDao userDao = daoFactory.getUserDaoInstance();
 
         Assert.assertTrue(userDao.emailTaken("denis_parkhomenko@ukr.net"));
 
         Assert.assertFalse(userDao.emailTaken("iAmNot@Taken.com"));
-        DbUtils.rollbackAndCloseQuietly(connection);
     }
 
     @Test
-    public void get_by_id() throws DatabaseException, SQLException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
-
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+    public void get_by_id() throws DatabaseRuntimeException, SQLException {
+        UserDao userDao = daoFactory.getUserDaoInstance();
 
         User user = userDao.findByPK(1L);
 
@@ -106,17 +88,12 @@ public class UserDaoImplTest {
 
         Assert.assertNull(userDao.findByPK(322L));
 
-        DbUtils.rollbackAndCloseQuietly(connection);
     }
 
 
     @Test
-    public void findFiveBestMasters() throws DatabaseException, SQLException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
-
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+    public void findFiveBestMasters() throws DatabaseRuntimeException, SQLException {
+        UserDao userDao = daoFactory.getUserDaoInstance();
 
         List<User> fiveBestMasters = userDao.findFiveBestMasters();
 
@@ -132,19 +109,13 @@ public class UserDaoImplTest {
 
         Assert.assertTrue(rightOrder);
 
-        DbUtils.rollbackAndCloseQuietly(userDao.getConnection());
     }
 
     @Test(expected = NotImplementedException.class)
-    public void deleteException() throws DatabaseException, SQLException {
-        Connection connection = DataSource.getInstance().getConnection();
-        connection.setAutoCommit(false);
+    public void deleteException() throws DatabaseRuntimeException, SQLException {
 
-        UserDao userDao = DaoFactory.getUserDaoInstance();
-        userDao.setConnection(connection);
+        UserDao userDao = daoFactory.getUserDaoInstance();
         userDao.delete(new User.UserBuilder().build());
 
-
-        DbUtils.rollbackAndCloseQuietly(userDao.getConnection());
     }
 }
