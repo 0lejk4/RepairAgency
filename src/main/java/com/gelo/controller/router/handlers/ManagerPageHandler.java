@@ -1,5 +1,6 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
@@ -20,6 +21,7 @@ import java.io.IOException;
  * Manager page handler that populates request with awaiting answer orders
  * and with order management of Manager.
  */
+@GetMapping
 @PreAuthorize(role = RoleType.ROLE_MANAGER)
 public class ManagerPageHandler implements Handler {
     OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);

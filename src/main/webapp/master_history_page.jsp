@@ -5,6 +5,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
+
 <jsp:useBean id="workHistory" scope="request" type="java.util.List<com.gelo.model.domain.Order>"/>
 <html>
 <head>

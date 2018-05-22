@@ -1,5 +1,6 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
@@ -19,6 +20,7 @@ import java.io.IOException;
  * Forwards to master page and populates it with orders that master can enroll on
  * and  orders that master is working in or done in past.
  */
+@GetMapping
 @PreAuthorize(role = RoleType.ROLE_MASTER)
 public class MasterPageHandler implements Handler {
     OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);

@@ -1,5 +1,6 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.model.domain.Review;
 import com.gelo.model.domain.User;
 import com.gelo.services.ReviewService;
@@ -17,6 +18,7 @@ import java.io.IOException;
 /**
  * Shows some users profile with all reviews it has.
  */
+@GetMapping
 public class ProfileHandler implements Handler {
     UserService userService = BeanStorage.INSTANCE.get(UserService.class);
     private ReviewService reviewService = BeanStorage.INSTANCE.get(ReviewService.class);

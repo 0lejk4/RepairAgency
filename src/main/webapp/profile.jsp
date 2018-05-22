@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
+
 <jsp:useBean id="profile_user" scope="request" type="com.gelo.model.domain.User"/>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>

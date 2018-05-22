@@ -1,6 +1,7 @@
 package com.gelo.controller.router.handlers;
 
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.model.domain.RoleType;
 import com.gelo.services.OrderService;
@@ -17,6 +18,7 @@ import java.io.IOException;
 /**
  * Shows admin page with all orders and users that exists.
  */
+@GetMapping
 @PreAuthorize(role = RoleType.ROLE_ADMIN)
 public class AdminPageHandler implements Handler {
     UserService userService = BeanStorage.INSTANCE.get(UserService.class);

@@ -1,5 +1,6 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.User;
 import com.gelo.services.OrderService;
@@ -18,6 +19,7 @@ import java.io.IOException;
  * Shows client`s history page with all
  * orders user has at the moment and had in past
  */
+@GetMapping
 public class ClientHistoryPageHandler implements Handler {
     OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);
     @Override

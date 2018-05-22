@@ -35,7 +35,8 @@ ___
  executed and also secures access to Handlers by Role, Permission and RequestMethod
 * Handlers are mapped to router using router.properties file
 * Automatic form validation with alert creation for each error in form
-* Generic class for DAO that simplifies crud operations
+* JdbcTemplate that simplify operations in DAO.
+* Transaction management using DataSourceWrapper and ConnectionWrapper
 
 ___
 >### Installation guide:

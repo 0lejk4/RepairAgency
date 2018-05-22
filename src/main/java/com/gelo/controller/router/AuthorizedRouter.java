@@ -103,6 +103,9 @@ public class AuthorizedRouter implements Router {
         GetMapping get = handler.getAnnotation(GetMapping.class);
         PostMapping post = handler.getAnnotation(PostMapping.class);
 
+        //Skip this step if the request is from Dispatcher forward
+        if(request.getAttribute("from_dispatcher") != null) return true;
+
         if (get == null && post == null) {
             return true;
         }
@@ -179,6 +182,8 @@ public class AuthorizedRouter implements Router {
         boolean authorized = preAuthorize(handler.getClass(), request);
 
         boolean requestMethodMatches = checkMethod(handler.getClass(), request);
+
+        request.setAttribute("from_dispatcher", new Object());
 
         //Not authorized - not found, user should not know what page exists but he cant access
         return (authorized && requestMethodMatches)

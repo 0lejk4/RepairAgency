@@ -1,6 +1,7 @@
 package com.gelo.controller.router.handlers;
 
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.services.UserService;
 import com.gelo.util.BeanStorage;
 import com.gelo.util.Transport;
@@ -14,6 +15,7 @@ import java.io.IOException;
 /**
  * Forwards to home page and populates top 5 masters collection
  */
+@GetMapping
 public class HomeHandler implements Handler {
     UserService userService = BeanStorage.INSTANCE.get(UserService.class);
 

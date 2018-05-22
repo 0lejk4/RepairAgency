@@ -1,5 +1,6 @@
 package com.gelo.controller.router.handlers;
 
+import com.gelo.controller.router.annotation.GetMapping;
 import com.gelo.controller.router.annotation.PreAuthorize;
 import com.gelo.model.domain.Order;
 import com.gelo.model.domain.RoleType;
@@ -16,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+@GetMapping
 @PreAuthorize(role = RoleType.ROLE_MASTER)
 public class MasterHistoryHandler implements Handler {
     OrderService orderService = BeanStorage.INSTANCE.get(OrderService.class);

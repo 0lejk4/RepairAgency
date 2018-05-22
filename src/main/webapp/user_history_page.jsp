@@ -4,6 +4,7 @@
 <fmt:setBundle basename="repair_agency_localization"/>
 <%@ taglib prefix="auth" uri="/authtags" %>
 <%@ taglib prefix="info" tagdir="/WEB-INF/tags" %>
+
 <%@ page contentType="text/html;charset=UTF-8" %>
 <jsp:useBean id="orders" scope="request" type="java.util.List<com.gelo.model.domain.Order>"/>
 <html>
