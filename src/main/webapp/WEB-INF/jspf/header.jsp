@@ -6,6 +6,8 @@
 <%@ taglib prefix="info" tagdir="/WEB-INF/tags" %>
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
+<%@ page import="com.gelo.model.domain.RoleType" %>
+
 <html lang="${sessionScope['language']}">
 <body>
 <div class="navbar navbar-light bg-light navbar-expand-md" role="navigation">

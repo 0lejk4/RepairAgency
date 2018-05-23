@@ -5,6 +5,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <fmt:setLocale value="${sessionScope['language']}"/>
 <fmt:setBundle basename="repair_agency_localization"/>
+<%@ page import="com.gelo.model.domain.PermissionType" %>
 <jsp:useBean id="managementHistory" scope="request" type="java.util.List<com.gelo.model.domain.Order>"/>
 <html>
 <head>
